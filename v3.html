@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open House</title> <!-- Set by JS -->
+
+    <!-- ★★★ START: SOCIAL SHARE META TAGS - EDIT MANUALLY FOR EACH PAGE ★★★ -->
+    <meta property="og:title" content="Open House" />
+    <meta property="og:description" content="Welcome to the Open House" />
+    <meta property="og:image" content="https://www.gta-homes.com/wp-content/uploads/what-is-an-open-house-01.jpg" /> <!-- Match Config -->
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Open House" />
+    <meta name="twitter:description" content="Welcome to the Open House" />
+    <meta name="twitter:image" content="https://www.gta-homes.com/wp-content/uploads/what-is-an-open-house-01.jpg" /> <!-- Match Config -->
+    <!-- ★★★ END: SOCIAL SHARE META TAGS ★★★ -->
+
+    <!-- FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Italiana&family=Manrope:wght@200;300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- LIBRARIES -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+    <script src="https://unpkg.com/split-type"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- LOAD YOUR CONFIG HERE -->
+    <script src="config.js"></script> 
+
+    <style>
+        /* CORE AESTHETICS */
+        :root {
+            --bg: #050505;
+            --text: #e0e0e0;
+            --accent: #d4af37; /* Muted Gold */
+            --line: rgba(255,255,255,0.1);
+            --font-disp: 'Italiana', serif;
+            --font-body: 'Manrope', sans-serif;
+        }
+
+        * { box-sizing: border-box; cursor: none; }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* GRAIN & CURSOR */
+        .grain {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            opacity: 0.04; pointer-events: none; z-index: 9000;
+        }
+        .cursor {
+            position: fixed; top: 0; left: 0;
+            width: 12px; height: 12px;
+            background: #fff; border-radius: 50%;
+            pointer-events: none; z-index: 10000;
+            mix-blend-mode: difference;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+        .cursor.hovered { width: 80px; height: 80px; background: #fff; opacity: 1; }
+
+        /* PRELOADER */
+        .loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            display: flex; align-items: flex-end; justify-content: space-between;
+            padding: 40px;
+        }
+        .loader-text { font-family: var(--font-disp); font-size: 10vw; color: #333; }
+        .loader-count { font-family: var(--font-body); font-size: 1.5rem; }
+
+        /* LAYOUT */
+        section { position: relative; width: 100%; padding: 0 5vw; }
+        h1, h2, h3 { font-family: var(--font-disp); font-weight: 400; margin: 0; line-height: 1; }
+        
+        /* HERO */
+        .hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; padding-top: 10vh; }
+        .hero-eyebrow { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.4em; margin-bottom: 2rem; opacity: 0; color: var(--accent); }
+        
+        /* Dynamic Title Container */
+        .hero-title-container { display: flex; flex-direction: column; gap: 0; }
+        .hero-title { font-size: clamp(3.5rem, 10vw, 12rem); text-transform: uppercase; overflow: hidden; line-height: 0.9; opacity: 0; transform: translateY(100px); }
+        
+        .hero-image-wrap {
+            position: absolute; top: 0; right: 0; width: 45vw; height: 80vh;
+            overflow: hidden; z-index: -1; opacity: 0;
+        }
+        .hero-image { width: 100%; height: 120%; object-fit: cover; filter: grayscale(100%) contrast(110%); opacity: 0.6; }
+
+        /* SUBTITLE / MANIFESTO */
+        .manifesto { padding: 15vh 5vw; }
+        #heroSubtitle { font-size: clamp(1.5rem, 3vw, 2.8rem); line-height: 1.4; color: #888; max-width: 90%; }
+        .highlight { color: #fff; }
+
+        /* AMENITIES (Replaces Gallery) */
+        .amenities-section { padding-bottom: 10vh; }
+        .amenity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5vw; margin-top: 5vh; }
+        .amenity-card { border-top: 1px solid var(--line); padding-top: 2rem; transition: 0.3s; }
+        .amenity-card:hover { border-top-color: var(--accent); }
+        .amenity-icon { font-size: 2rem; color: var(--accent); margin-bottom: 1rem; display: block; }
+        .amenity-text { font-family: var(--font-disp); font-size: 2rem; color: #fff; }
+
+        /* HOST SECTION */
+        .host-section { display: flex; flex-direction: row-reverse; gap: 5vw; align-items: center; padding: 10vh 5vw; }
+        .host-img-wrap { width: 30vw; height: 40vw; overflow: hidden; position: relative; }
+        .host-img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); transition: 0.5s; }
+        .host-img-wrap:hover .host-img { filter: grayscale(0%); }
+        
+        .host-info { flex: 1; }
+        .host-contact-grid { 
+            display: flex; gap: 2rem; margin-top: 2rem; 
+            font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--accent); 
+        }
+        .host-contact-item a { color: inherit; text-decoration: none; transition: 0.3s; }
+        .host-contact-item a:hover { color: #fff; }
+        #socialLinks { margin-top: 2rem; display: flex; gap: 15px; font-size: 1.5rem; }
+        #socialLinks a { color: #666; transition: 0.3s; }
+        #socialLinks a:hover { color: #fff; }
+
+        /* FORM SECTION */
+        .access { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+        .form-wrap { border-top: 1px solid var(--line); margin-top: 3rem; }
+        .input-group { position: relative; border-bottom: 1px solid var(--line); padding: 2rem 0; transition: 0.5s; }
+        .input-group:hover { border-bottom-color: #fff; padding-left: 20px; }
+        .input-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.2em; color: #666; display: block; margin-bottom: 1rem; }
+        input { width: 100%; background: transparent; border: none; font-family: var(--font-disp); font-size: 2.5rem; color: #fff; outline: none; }
+        input::placeholder { color: #222; }
+        
+        .consent-row { margin-top: 2rem; font-size: 0.75rem; color: #555; display: flex; gap: 1rem; align-items: center; }
+        .consent-row input { width: auto; height: auto; }
+        .consent-row a { color: var(--accent); text-decoration: none; }
+
+        .btn-submit {
+            margin-top: 5vh; width: 100%; padding: 2rem 0;
+            background: transparent; border: 1px solid var(--line);
+            color: #fff; font-family: var(--font-body); text-transform: uppercase;
+            letter-spacing: 0.3em; font-size: 1rem; transition: 0.4s; position: relative; overflow: hidden;
+        }
+        .btn-submit::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 0%; height: 100%;
+            background: #fff; z-index: -1; transition: 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .btn-submit:hover { color: #000; border-color: #fff; }
+        .btn-submit:hover::after { width: 100%; }
+        
+        .spinner { display: inline-block; width: 15px; height: 15px; border: 2px solid #000; border-top-color: transparent; border-radius: 50%; animation: spin 1s infinite linear; margin-left: 10px; display: none; }
+        @keyframes spin { to {transform: rotate(360deg);} }
+
+        /* FOOTER */
+        footer { padding: 50px 5vw; display: flex; justify-content: space-between; border-top: 1px solid var(--line); font-size: 0.8rem; color: #666; text-transform: uppercase; flex-wrap: wrap; gap: 20px; }
+        #footerLogo { height: 30px; opacity: 0.5; filter: grayscale(100%); }
+
+        /* MODAL */
+        .modal-cover {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5,5,5,0.95); backdrop-filter: blur(20px); color: #fff; z-index: 9995;
+            transform: translateY(100%); display: flex; align-items: center; justify-content: center;
+            text-align: center; transition: 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .modal-cover.active { transform: translateY(0); }
+        .modal-content { width: 90%; max-width: 600px; }
+        .modal-option {
+            display: block; width: 100%; background: transparent; border: 1px solid var(--line);
+            color: #fff; padding: 1.5rem; margin-bottom: 1rem;
+            font-family: var(--font-body); text-transform: uppercase; letter-spacing: 0.2em;
+            transition: 0.3s;
+        }
+        .modal-option:hover { background: #fff; color: #000; }
+
+        /* MOBILE */
+        @media(max-width: 768px) {
+            .hero-image-wrap { width: 100%; height: 80vh; top: auto; bottom: 0; opacity: 0.4; }
+            .host-section { flex-direction: column-reverse; }
+            .host-img-wrap { width: 100%; height: 100vw; margin-bottom: 2rem; }
+            .amenity-grid { grid-template-columns: 1fr; }
+            .hero-title { font-size: 18vw; }
+            footer { flex-direction: column; align-items: center; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="grain"></div>
+    <div class="cursor"></div>
+    <canvas id="confetti-canvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9998;"></canvas>
+
+    <!-- PRELOADER -->
+    <div class="loader">
+        <div class="loader-text" id="loaderBrand">RESIDENCE</div>
+        <div class="loader-count">00</div>
+    </div>
+
+    <!-- SMOOTH SCROLL WRAPPER -->
+    <main id="smooth-wrapper">
+        
+        <!-- NAV (Hidden visual, used for layout) -->
+        <nav style="position:absolute; top:30px; left:5vw; width:90vw; display:flex; justify-content:space-between; z-index:100; mix-blend-mode:difference;">
+            <a href="#" id="navBrand" class="hover-target" style="color:#fff; text-decoration:none; font-family:var(--font-disp); text-transform:uppercase; letter-spacing:0.1em;"></a>
+            <span id="navAddress" style="color:#fff; font-size:0.8rem; font-family:var(--font-body); opacity:0.8;"></span>
+        </nav>
+
+        <section class="hero">
+            <div style="position:relative; z-index:2;">
+                <div class="hero-eyebrow">Exclusive Preview</div>
+                <div class="hero-title-container" id="dynamicTitle">
+                    <!-- Generated by JS -->
+                    <h1 class="hero-title">THE</h1>
+                    <h1 class="hero-title" style="margin-left: 10vw;">RESIDENCE</h1>
+                </div>
+            </div>
+            <div class="hero-image-wrap">
+                <img src="" id="heroImg" class="hero-image" data-speed="0.5">
+            </div>
+        </section>
+
+        <section class="manifesto">
+            <p id="heroSubtitle"></p>
+        </section>
+
+        <section class="amenities-section">
+            <div class="hero-eyebrow" style="opacity: 1;">The Bundle</div>
+            <div class="amenity-grid" id="amenitiesGrid">
+                <!-- JS Generated -->
+            </div>
+        </section>
+
+        <section class="host-section">
+            <div class="host-info">
+                <div class="hero-eyebrow" style="opacity:1; color:var(--accent);">Your Curator</div>
+                <h2 style="font-size: clamp(2rem, 5vw, 4rem); margin-bottom: 0.5rem;" id="realtorName"></h2>
+                <div id="realtorTitle" style="font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.2em;"></div>
+                <p style="font-size: 1.1rem; line-height: 1.6; color: #888; max-width: 500px;" id="realtorBio"></p>
+                
+                <div class="host-contact-grid" id="realtorContactInfo">
+                    <!-- JS Injected: Title, Phone, Email -->
+                </div>
+
+                <div id="socialLinks"></div>
+            </div>
+            <div class="host-img-wrap hover-target">
+                <img src="" id="realtorPhoto" class="host-img">
+            </div>
+        </section>
+
+        <section class="access" id="register">
+            <div style="margin-bottom: 60px;">
+                <div class="hero-eyebrow" style="opacity: 1;">The Registry</div>
+                <h2 style="font-size: clamp(3rem, 6vw, 6rem);">Secure Access.</h2>
+            </div>
+            
+            <form id="luxeForm">
+                <div class="form-wrap">
+                    <div class="input-group hover-target">
+                        <label class="input-label">Identity</label>
+                        <input type="text" id="fullName" placeholder="Full Name" required autocomplete="name">
+                    </div>
+                    <div class="input-group hover-target">
+                        <label class="input-label">Correspondence</label>
+                        <input type="email" id="email" placeholder="Email Address" required autocomplete="email">
+                    </div>
+                    <div class="input-group hover-target">
+                        <label class="input-label">Contact</label>
+                        <input type="tel" id="phone" placeholder="Phone Number" required autocomplete="tel" inputmode="numeric">
+                    </div>
+                </div>
+
+                <div class="consent-row">
+                    <input type="checkbox" id="consentCheckbox" required class="hover-target">
+                    <label for="consentCheckbox" id="consentLabel" style="line-height: 1.4;">
+                        <!-- Injected via JS -->
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-submit hover-target" id="submitBtn">
+                    <span id="btnText">Request Access</span> <div class="spinner"></div>
+                </button>
+            </form>
+        </section>
+
+        <footer>
+            <div id="footerBrand"></div>
+            <div id="footerAddress"></div>
+            <a href="#" id="footerPrivacy" style="color:inherit; text-decoration:none; transition:0.3s;" class="hover-target">PRIVACY POLICY</a>
+            <div><img src="" id="footerLogo" style="display:none;"></div>
+            <div>© <span id="year"></span></div>
+        </footer>
+
+    </main>
+
+    <!-- MODAL -->
+    <div class="modal-cover" id="modalOverlay">
+        <div class="modal-content">
+            <div id="modalQuestionsContainer"></div>
+            
+            <!-- Success Message (Hidden initially) -->
+            <div id="successMessage" style="display:none;">
+                <h2 style="color:var(--accent);">Access<br>Granted</h2>
+                <p>The dossier has been sent.</p>
+                <button onclick="location.reload()" class="btn-submit hover-target" style="margin-top:30px; border:1px solid #fff;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * ==================================================================
+         * 1. CONFIGURATION FALLBACK
+         * (If config.js is missing, this acts as a placeholder)
+         * ==================================================================
+         */
+        if (typeof config === 'undefined') {
+            window.config = {
+                meta: { titlePrefix: "The Residence", navBrandText: "LUXE", privacyLink: "#" },
+                property: { streetAddress: "1400 Pacific Heights", heroSubtitle: "An architectural masterpiece waiting for its curator.", backgroundImageUrl: "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=2000&auto=format&fit=crop" },
+                realtor: { fullName: "Victoria Saint", title: "Senior Director", bio: "Curating homes for the discerning few.", phone: "555-0123", email: "vip@residence.com", photoUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=800&auto=format&fit=crop", social: { instagram: "#" } },
+                brokerage: { name: "Maison Global", address: "Beverly Hills, CA", logoUrl: "" },
+                openHouse: { bundleItems: [{ icon: "fas fa-star", text: "Panoramic Views" }, { icon: "fas fa-key", text: "Private Access" }] },
+                settings: { visitorWebhookUrl: "", confettiColors: ['#d4af37', '#ffffff'] },
+                modalQuestions: [{ id: "time", questionText: "Timeline?", options: [{ text: "ASAP", value: "asap" }] }]
+            };
+        }
+
+        /**
+         * ==================================================================
+         * 2. CORE LOGIC
+         * ==================================================================
+         */
+        document.addEventListener("DOMContentLoaded", () => {
+            applyThemeColors();
+            populateV3Data();
+            
+            // Start Preloader after data is set
+            runPreloader();
+            
+            // Init Form Listeners
+            setupForm();
+        });
+
+        function applyThemeColors() {
+            if (config.settings) {
+                const root = document.documentElement;
+                if (config.settings.primaryColor) root.style.setProperty('--text', config.settings.primaryColor);
+                if (config.settings.secondaryColor) root.style.setProperty('--accent', config.settings.secondaryColor);
+                if (config.settings.accentColor) root.style.setProperty('--line', config.settings.accentColor);
+                if (config.settings.neutralColor) root.style.setProperty('--bg', config.settings.neutralColor);
+            }
+        }
+
+        function populateV3Data() {
+            // META
+            document.title = `${config.meta.pageTitlePrefix || config.meta.titlePrefix} | ${config.property.streetAddress}`;
+
+            // NAV & BRANDING
+            document.getElementById('navBrand').innerText = config.realtor.fullName || config.meta.navBrandText;
+            document.getElementById('navAddress').innerText = config.property.streetAddress;
+            document.getElementById('loaderBrand').innerText = config.realtor.fullName;
+
+            // HERO TITLE (Split Logic)
+            const titleContainer = document.getElementById('dynamicTitle');
+            titleContainer.innerHTML = '';
+            const words = config.property.streetAddress.split(' ');
+            
+            // Logic to distribute words dramatically
+            let html = '';
+            if(words.length === 1) {
+                html = `<h1 class="hero-title" style="text-align:center">${words[0]}</h1>`;
+            } else if (words.length === 2) {
+                html = `<h1 class="hero-title">${words[0]}</h1><h1 class="hero-title" style="text-align:right">${words[1]}</h1>`;
+            } else {
+                html = `<h1 class="hero-title">${words[0]}</h1>
+                        <h1 class="hero-title" style="margin-left:10vw">${words.slice(1, words.length-1).join(' ')}</h1>
+                        <h1 class="hero-title" style="text-align:right">${words[words.length-1]}</h1>`;
+            }
+            titleContainer.innerHTML = html;
+
+            // HERO IMAGERY & SUBTITLE
+            document.getElementById('heroImg').src = config.property.backgroundImageUrl;
+            document.getElementById('heroSubtitle').innerHTML = config.property.heroSubtitle;
+
+            // AMENITIES (Bundle Items)
+            const amenityGrid = document.getElementById('amenitiesGrid');
+            if(config.openHouse && config.openHouse.bundleItems) {
+                const itemsHtml = config.openHouse.bundleItems.map(item => `
+                    <div class="amenity-card">
+                        <i class="${item.icon} amenity-icon"></i>
+                        <div class="amenity-text">${item.text}</div>
+                    </div>
+                `).join('');
+                amenityGrid.innerHTML = itemsHtml;
+            }
+
+            // REALTOR
+            const r = config.realtor;
+            document.getElementById('realtorName').innerText = r.fullName;
+            document.getElementById('realtorTitle').innerText = r.title;
+            document.getElementById('realtorBio').innerHTML = r.bio;
+            document.getElementById('realtorPhoto').src = r.photoUrl;
+            
+            // Realtor Contact Block
+            const contactInfo = document.getElementById('realtorContactInfo');
+            contactInfo.innerHTML = `
+                <div class="host-contact-item"><span style="display:block; color:#666; font-size:0.6rem;">DIRECT</span><a href="tel:${r.phone}">${r.phone}</a></div>
+                <div class="host-contact-item"><span style="display:block; color:#666; font-size:0.6rem;">EMAIL</span><a href="mailto:${r.email}">${r.email}</a></div>
+            `;
+
+            // Socials
+            const socials = document.getElementById('socialLinks');
+            if(r.social) {
+                const iconMap = {
+                    facebook: 'fab fa-facebook-f',
+                    instagram: 'fab fa-instagram',
+                    linkedin: 'fab fa-linkedin-in',
+                    twitter: 'fab fa-twitter',
+                    x: 'fab fa-twitter',
+                    website: 'fas fa-globe'
+                };
+
+                Object.entries(r.social).forEach(([key, link]) => {
+                    if(link) {
+                        const iconClass = iconMap[key.toLowerCase()] || 'fas fa-link';
+                        socials.innerHTML += `<a href="${link}" target="_blank" class="hover-target"><i class="${iconClass}"></i></a>`;
+                    }
+                });
+            }
+
+            // FORM & FOOTER
+            const consentLabel = document.getElementById('consentLabel');
+            consentLabel.innerHTML = `I agree to be contacted by <strong style="color:#fff;">${config.brokerage.name}</strong> via call, email, and text. To opt-out, you can reply ‘stop’ at any time or click the unsubscribe link in the emails. Message and data rates may apply. <a href="${config.meta.privacyPolicyLink}" target="_blank" style="color:var(--accent); text-decoration:none;">Privacy Policy</a>`;
+            
+            document.getElementById('footerBrand').innerText = config.brokerage.name;
+            document.getElementById('footerAddress').innerText = config.brokerage.address;
+            document.getElementById('footerPrivacy').href = config.meta.privacyPolicyLink;
+            if(config.brokerage.logoUrl) {
+                const logo = document.getElementById('footerLogo');
+                logo.src = config.brokerage.logoUrl;
+                logo.style.display = "block";
+            }
+            document.getElementById('year').innerText = new Date().getFullYear();
+        }
+
+        // --- ANIMATION SEQUENCES ---
+        
+        function runPreloader() {
+            if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+                gsap.registerPlugin(ScrollTrigger);
+            }
+
+            const countEl = document.querySelector('.loader-count');
+            let count = 0;
+            const countInterval = setInterval(() => {
+                count += 2;
+                countEl.innerText = count < 10 ? `0${count}` : count;
+                if (count >= 100) {
+                    countEl.innerText = "100";
+                    clearInterval(countInterval);
+                    initSiteAnimations();
+                }
+            }, 30);
+        }
+
+        function initSiteAnimations() {
+            // Reveal
+            const tl = gsap.timeline();
+            tl.to('.loader', { yPercent: -100, duration: 1.2, ease: "power4.inOut" })
+              .to('.hero-image-wrap', { opacity: 1, duration: 1.5, scale: 1.05, ease: "power2.out" }, "-=0.8")
+              .to('.hero-title', { y: 0, opacity: 1, stagger: 0.2, duration: 1.5, ease: "power4.out" }, "-=1")
+              .to('.hero-eyebrow', { opacity: 1, duration: 1 }, "-=1");
+
+            // Init Lenis
+            const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+            function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+            requestAnimationFrame(raf);
+
+            // Split Type Effect
+            const split = new SplitType('#heroSubtitle', { types: 'words' });
+            gsap.from(split.words, {
+                opacity: 0.1,
+                stagger: 0.02,
+                scrollTrigger: { trigger: '.manifesto', start: "top 70%", end: "bottom 50%", scrub: true }
+            });
+
+            // Amenities Fade In Effect (Scroll Down)
+            if (typeof ScrollTrigger !== 'undefined') {
+                // Start hidden
+                gsap.set('.amenity-card', { opacity: 0, y: 50 });
+                
+                gsap.to('.amenity-card', {
+                    y: 0, 
+                    opacity: 1, 
+                    stagger: 0.1, 
+                    ease: "power2.out",
+                    scrollTrigger: { 
+                        trigger: '.amenity-grid', 
+                        start: "top 80%", // Starts fading in when top of grid hits 80% down viewport
+                        end: "bottom 60%", // Fully visible when bottom hits 60% down
+                        scrub: 0.5
+                    }
+                });
+            } else {
+                gsap.set('.amenity-card', { opacity: 1, y: 0 });
+            }
+        }
+
+        // --- FORM HANDLING & WEBHOOKS ---
+
+        let storedInitialPayload = null;
+        let collectedAnswers = {};
+
+        function setupForm() {
+            // Phone Format
+            document.getElementById('phone').addEventListener('input', function (e) {
+                var x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+                e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+            });
+
+            document.getElementById('luxeForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const btn = document.getElementById('submitBtn');
+                const btnText = document.getElementById('btnText');
+                const spinner = btn.querySelector('.spinner');
+                
+                btnText.innerText = "Processing";
+                spinner.style.display = "inline-block";
+
+                // 1. Construct Initial Payload
+                storedInitialPayload = {
+                    formType: "initial_contact",
+                    fullName: document.getElementById('fullName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    propertyAddress: `${config.property.streetAddress}, ${config.property.cityStateZip}`,
+                    agentEmail: config.realtor.email,
+                    submittedAt: new Date().toISOString(),
+                    questions: [],
+                    ...(config.deploymentInfo || {})
+                };
+
+                // 2. Send to Webhook
+                if(config.settings.visitorWebhookUrl) {
+                    try {
+                        await fetch(config.settings.visitorWebhookUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(storedInitialPayload),
+                            mode: 'cors' // or no-cors depending on your webhook
+                        });
+                    } catch(err) { console.log("Webhook error", err); }
+                }
+
+                // 3. Open Modal
+                setTimeout(() => {
+                    spinner.style.display = "none";
+                    btnText.innerText = "Sent";
+                    showModalStep(0);
+                }, 1000);
+            });
+        }
+
+        function showModalStep(index) {
+            const modal = document.getElementById('modalOverlay');
+            const container = document.getElementById('modalQuestionsContainer');
+            
+            modal.classList.add('active');
+            container.innerHTML = '';
+
+            if(index < config.modalQuestions.length) {
+                const q = config.modalQuestions[index];
+                let html = `
+                    <div style="color:var(--accent); font-size:0.8rem; margin-bottom:20px; letter-spacing:0.2em; text-transform:uppercase;">Question ${index+1}</div>
+                    <h2 style="font-size: clamp(2rem, 4vw, 4rem); margin-bottom: 40px;">${q.questionText}</h2>
+                    <div>
+                `;
+                q.options.forEach(opt => {
+                    html += `<button class="modal-option hover-target" onclick="handleModalAnswer('${q.id}', '${opt.value}', ${index})">${opt.text}</button>`;
+                });
+                html += `</div>`;
+                container.innerHTML = html;
+            } else {
+                finishModal();
+            }
+        }
+
+        window.handleModalAnswer = (qid, val, idx) => {
+            collectedAnswers[qid] = val;
+            showModalStep(idx + 1);
+        };
+
+        async function finishModal() {
+            // Process Answers into Array
+            const questions = config.modalQuestions || [];
+            const modalQuestionResponses = [];
+            
+            for (const [qId, answerVal] of Object.entries(collectedAnswers)) {
+                const qObj = questions.find(q => q.id === qId);
+                if (qObj) {
+                    const optObj = qObj.options.find(o => o.value === answerVal);
+                    modalQuestionResponses.push({
+                        question: qObj.questionText,
+                        answer: optObj ? optObj.text : answerVal
+                    });
+                }
+            }
+
+            // Construct Final Payload
+            const finalPayload = {
+                ...storedInitialPayload,
+                formType: "modal_answers",
+                submittedAt: new Date().toISOString(),
+                questions: modalQuestionResponses
+            };
+
+            // Send Final Webhook
+            if(config.settings.visitorWebhookUrl) {
+                fetch(config.settings.visitorWebhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(finalPayload),
+                    mode: 'cors'
+                });
+            }
+
+            // Show Success UI
+            document.getElementById('modalQuestionsContainer').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // Confetti
+            const colors = config.settings.confettiColors || ['#d4af37', '#ffffff'];
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: colors });
+        }
+
+        // CUSTOM CURSOR LOGIC
+        const cursor = document.querySelector('.cursor');
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1, ease: "power2.out" });
+        });
+        document.addEventListener('mouseover', (e) => {
+            if(e.target.classList.contains('hover-target') || e.target.tagName==='A' || e.target.tagName==='BUTTON' || e.target.tagName==='INPUT') {
+                cursor.classList.add('hovered');
+            } else {
+                cursor.classList.remove('hovered');
+            }
+        });
+
+    </script>
+</body>
+</html>

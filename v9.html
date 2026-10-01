@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open House</title> <!-- Set by JS -->
+
+    <!-- ★★★ START: SOCIAL SHARE META TAGS - EDIT MANUALLY FOR EACH PAGE ★★★ -->
+    <meta property="og:title" content="Open House" />
+    <meta property="og:description" content="Welcome to the Open House" />
+    <meta property="og:image" content="https://www.gta-homes.com/wp-content/uploads/what-is-an-open-house-01.jpg" /> <!-- Match Config -->
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Open House" />
+    <meta name="twitter:description" content="Welcome to the Open House" />
+    <meta name="twitter:image" content="https://www.gta-homes.com/wp-content/uploads/what-is-an-open-house-01.jpg" /> <!-- Match Config -->
+    <!-- ★★★ END: SOCIAL SHARE META TAGS ★★★ -->
+
+    <!-- FONTS: CHUNKY & LOUD -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- LIBRARIES -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- LOAD CONFIG -->
+    <script src="config.js"></script>
+
+    <style>
+        /* 
+         * 1. THE DOPAMINE PALETTE
+         */
+        :root {
+            --c-bg: #fff9f0; /* Cream Canvas */
+            --c-ink: #121212;
+            
+            --pop-pink: #ff6b9d;
+            --pop-blue: #4d96ff;
+            --pop-lime: #ccff00;
+            --pop-yell: #ffce00;
+            --pop-purp: #b388ff;
+
+            --border: 3px solid var(--c-ink);
+            --shadow: 8px 8px 0px var(--c-ink);
+            --shadow-hover: 12px 12px 0px var(--c-ink);
+            --shadow-active: 0px 0px 0px var(--c-ink);
+            
+            --font-head: 'Dela Gothic One', display;
+            --font-body: 'Outfit', sans-serif;
+            
+            --radius-pill: 100px;
+            --radius-card: 24px;
+        }
+
+        * { box-sizing: border-box; cursor: none; }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--c-bg);
+            background-image: radial-gradient(var(--c-ink) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: var(--c-ink);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        /* CUSTOM CURSOR (The Blob) */
+        #cursor {
+            position: fixed; top: 0; left: 0; width: 30px; height: 30px;
+            background: var(--pop-lime); border: 2px solid var(--c-ink); border-radius: 50%;
+            pointer-events: none; z-index: 9999; transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s, background 0.2s;
+        }
+        #cursor.hover {
+            width: 80px; height: 80px; background: var(--pop-pink); opacity: 0.8;
+            animation: blob 3s infinite linear;
+        }
+        @keyframes blob { 0%, 100% { border-radius: 50%; } 50% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; } }
+
+        /* UTILS */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 5vw; position: relative; z-index: 5; }
+        h1, h2, h3 { font-family: var(--font-head); text-transform: uppercase; margin: 0; line-height: 0.9; }
+        img { width: 100%; display: block; }
+
+        /* NAV */
+        nav {
+            position: fixed; top: 20px; left: 0; width: 100%; z-index: 100; padding: 0 5vw;
+            pointer-events: none;
+        }
+        .nav-pill {
+            background: #fff; border: var(--border); padding: 15px 30px; border-radius: var(--radius-pill);
+            display: flex; justify-content: space-between; align-items: center;
+            pointer-events: all; box-shadow: var(--shadow); max-width: 1200px; margin: 0 auto;
+        }
+        .brand { font-family: var(--font-head); font-size: 1.2rem; color: var(--c-ink); text-decoration: none; }
+        
+        /* BUTTONS (Arcade Style) */
+        .btn-pop {
+            display: inline-block; background: var(--pop-blue); color: #fff;
+            font-family: var(--font-head); font-size: 1rem; text-transform: uppercase; text-decoration: none;
+            padding: 15px 30px; border: var(--border); border-radius: var(--radius-pill);
+            box-shadow: var(--shadow); transition: 0.1s; cursor: none; transform: translate(-4px, -4px);
+        }
+        .btn-pop:hover { background: var(--pop-yell); color: var(--c-ink); transform: translate(-6px, -6px); box-shadow: var(--shadow-hover); }
+        .btn-pop:active { transform: translate(0, 0); box-shadow: var(--shadow-active); }
+
+        /* HERO */
+        .hero {  padding-top: 150px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .eyebrow {
+            display: inline-block; background: var(--c-ink); color: #fff; padding: 5px 15px;
+            border-radius: 10px; font-weight: 900; text-transform: uppercase; transform: rotate(-3deg); margin-bottom: 1rem;
+        }
+        .hero-title {
+            font-size: clamp(3rem, 10vw, 8rem); color: var(--pop-pink);
+            -webkit-text-stroke: 3px var(--c-ink); text-shadow: 6px 6px 0px var(--c-ink);
+            margin-bottom: -50px; position: relative; z-index: 2;
+        }
+        .hero-img-frame {
+            width: 90%; max-width: 800px; aspect-ratio: 16/9;
+            border: var(--border); border-radius: 30px; background: var(--c-ink);
+            overflow: hidden; position: relative; box-shadow: 20px 20px 0px var(--pop-lime);
+            transform: rotate(-1deg); transition: 0.3s;
+            margin: 0 auto 60px auto;
+            display: flex; /* Fix for extra space/black bar */
+        }
+        .hero-img-frame:hover { transform: rotate(0deg) scale(1.02); box-shadow: 10px 10px 0px var(--pop-purp); }
+        .hero-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        
+        .hero-address-pill {
+            position: relative; z-index: 10;
+            background: #fff; border: var(--border); border-radius: 50px; 
+            padding: 15px 40px; display: inline-block; 
+            box-shadow: 5px 5px 0px var(--c-ink); font-weight: 900;
+            font-size: 1.2rem;
+        }
+
+        /* VIBE CHECK SECTION */
+        .vibe-section { padding: 80px 0; position: relative; }
+        .vibe-card {
+            background: var(--pop-lime); border: var(--border); border-radius: 30px;
+            padding: 50px; box-shadow: 15px 15px 0px var(--c-ink);
+            transform: rotate(1deg); max-width: 900px; margin: 0 auto;
+            text-align: center;
+        }
+        .vibe-card h2 {
+            font-size: 3rem; margin-bottom: 30px; color: var(--c-ink);
+            text-shadow: 3px 3px 0px #fff;
+        }
+        .vibe-text {
+            font-size: 1.4rem; line-height: 1.6; font-weight: 500;
+        }
+
+        /* MARQUEE */
+        .marquee {
+            background: var(--pop-yell); border-top: var(--border); border-bottom: var(--border);
+            padding: 20px 0; margin: 120px 0 0px 0; transform: rotate(-2deg) scale(1.05); overflow: hidden;
+        }
+        .marquee-inner { display: flex; white-space: nowrap; gap: 50px; font-family: var(--font-head); font-size: 2rem; }
+
+        /* GOODIE BAG (Amenities) */
+        .goodie-section { padding: 50px 0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px; margin-top: 50px; }
+        .card {
+            background: #fff; border: var(--border); border-radius: 20px; padding: 30px;
+            text-align: center; box-shadow: var(--shadow); transition: 0.3s;
+        }
+        .card:hover { transform: translateY(-10px); box-shadow: var(--shadow-hover); }
+        .card:nth-child(1) { background: var(--pop-pink); }
+        .card:nth-child(2) { background: var(--pop-blue); }
+        .card:nth-child(3) { background: var(--pop-lime); }
+        .card-icon { font-size: 3rem; background: #fff; width: 80px; height: 80px; border-radius: 50%; border: var(--border); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; }
+
+        /* THE HYPE PERSON (Agent) */
+        .host-section { padding: 100px 0; }
+        .host-wrapper {
+            background: #fff; border: var(--border); border-radius: 50px; padding: 60px;
+            box-shadow: 20px 20px 0px var(--c-ink); display: flex; align-items: center; gap: 50px; flex-wrap: wrap;
+        }
+        .host-star {
+            width: 300px; height: 300px; position: relative;
+            background: var(--pop-purp); clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            display: flex; align-items: center; justify-content: center;
+            animation: spin 20s linear infinite;
+        }
+        @keyframes spin { to {transform: rotate(360deg);} }
+        .host-img {
+            width: 220px; height: 220px; border-radius: 50%; object-fit: cover; border: var(--border);
+            position: absolute; z-index: 2; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        }
+        .host-links a {
+            font-size: 2rem; color: var(--c-ink); margin-right: 20px; transition: 0.2s;
+        }
+        .host-links a:hover { color: var(--pop-pink); }
+
+        /* CONTACT DETAILS */
+        .contact-social-wrapper {
+            display: flex; align-items: center; justify-content: space-between; gap: 30px; flex-wrap: wrap;
+        }
+        .contact-details {
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .contact-item {
+            font-size: 1.2rem; color: var(--c-ink); text-decoration: none; 
+            font-weight: 700; display: flex; align-items: center; gap: 10px;
+        }
+        .contact-item:hover { color: var(--pop-pink); }
+
+        /* THE GUEST LIST (Form) */
+        .rsvp-section { padding: 100px 0; }
+        .clipboard {
+            max-width: 600px; margin: 0 auto; background: var(--pop-blue);
+            border: var(--border); border-radius: 30px; padding: 40px;
+            box-shadow: 20px 20px 0px var(--pop-lime); text-align: center;
+        }
+        .input-pop {
+            width: 100%; padding: 20px; margin-bottom: 15px; border: var(--border); border-radius: 15px;
+            font-family: var(--font-head); font-size: 1.2rem; outline: none;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.2); transition: 0.2s;
+        }
+        .input-pop:focus { transform: translate(-4px, -4px); box-shadow: 8px 8px 0px var(--c-ink); background: var(--pop-yell); }
+        
+        .check-wrap { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 20px 0; font-weight: 700; }
+        .check-wrap input { width: 20px; height: 20px; accent-color: var(--c-ink); border: 3px solid #000; }
+
+        /* FOOTER */
+        footer { 
+            background: var(--c-ink); color: #fff; padding: 60px; 
+            font-family: var(--font-head);
+            display: flex; justify-content: space-between; align-items: center; text-align: left;
+        }
+        .footer-content { flex: 1; }
+        .footer-logo { max-width: 150px; height: auto; margin-left: 30px; border-radius: 10px; }
+
+        /* MODAL */
+        .modal-takeover {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--pop-purp); z-index: 5000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        .modal-takeover.active { transform: translateY(0); }
+        
+        .vibe-btn {
+            width: 80%; max-width: 400px; background: #fff; border: var(--border); border-radius: 20px;
+            padding: 20px; margin: 10px 0; font-family: var(--font-head); font-size: 1.2rem;
+            box-shadow: var(--shadow); cursor: none; transition: 0.2s; text-transform: uppercase;
+        }
+        .vibe-btn:hover { transform: scale(1.05) rotate(-2deg); background: var(--pop-lime); }
+
+        @media(max-width: 768px) {
+            .hero { padding-top: 50px; min-height: 10vh; }
+            .hero-title { font-size: 14vw; -webkit-text-stroke: 1.5px var(--c-ink); }
+            .hero-img-frame {
+                width: 90%;
+                aspect-ratio: 16/9;
+                height: auto;
+                margin-bottom: 0;
+                background: var(--c-ink);
+            }
+            .hero-img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                min-height: auto;
+                min-width: auto;
+            }
+            .hero-address-pill { display: none; }
+            
+            /* MOBILE VIBE OPTIMIZATION */
+            .vibe-section { padding: 40px 5vw; }
+            .vibe-card {
+                padding: 30px 25px;
+                transform: rotate(0deg) !important; /* Reset rotation to save space */
+                border-radius: 25px;
+                box-shadow: 8px 8px 0px var(--c-ink);
+                width: 100%;
+                margin: 0;
+                text-align: left; /* Better readability on mobile */
+            }
+            .vibe-card h2 {
+                font-size: 2.2rem; 
+                margin-bottom: 15px;
+                line-height: 1;
+                text-align: center;
+            }
+            .vibe-text {
+                font-size: 1.1rem;
+                line-height: 1.5;
+                font-weight: 400;
+            }
+            .vibe-card .eyebrow {
+                transform: rotate(0deg) !important;
+                font-size: 0.9rem;
+                padding: 5px 12px;
+                margin-bottom: 20px;
+                display: inline-block;
+                /* Center eyebrow on mobile */
+                position: relative; left: 50%; translate: -50%;
+            }
+
+            .host-wrapper { flex-direction: column; padding: 30px; text-align: center; }
+            .contact-social-wrapper { flex-direction: column; gap: 20px; align-items: center; justify-content: center; }
+            .nav-pill { flex-direction: column; gap: 10px; border-radius: 20px; }
+            nav { top: auto; bottom: 20px; transition: transform 0.3s ease; }
+            nav.nav-hidden { transform: translateY(150%); }
+            .contact-details { align-items: center; }
+            footer { flex-direction: column; text-align: center; gap: 30px; }
+            .footer-logo { margin-left: 0; }
+            #cursor { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cursor"></div>
+    <canvas id="confetti-canvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:6000;"></canvas>
+
+    <!-- PRELOADER -->
+    <div class="modal-takeover" id="loader" style="background:var(--pop-yell); transform:translateY(0); z-index:10000;">
+        <h1 style="font-size:10vw; color:var(--c-ink);">LOADING<br>THE VIBE</h1>
+    </div>
+
+    <!-- NAV -->
+    <nav>
+        <div class="nav-pill">
+            <a href="#" class="brand hover-target" id="navBrand"></a>
+            <button onclick="document.getElementById('rsvp').scrollIntoView({behavior:'smooth'})" class="btn-pop hover-target">
+                GET ON THE LIST
+            </button>
+        </div>
+    </nav>
+
+    <main>
+        
+        <!-- HERO -->
+        <section class="hero">
+            <div class="container">
+                <div class="eyebrow">OPEN HOUSE PARTY</div>
+                <h1 class="hero-title" id="propTitle"></h1>
+                
+                <div class="hero-img-frame hover-target">
+                    <img src="" id="heroImg">
+                </div>
+
+                <div>
+                    <div class="hero-address-pill">
+                        📍 <span id="propAddress"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MARQUEE -->
+        <div class="marquee">
+            <div class="marquee-inner">
+                <!-- Content duplicated by JS for loop -->
+                <span id="scrollingText">★ GOOD VIBES ONLY ★ CHECK THE SPECS ★ ACCESS GRANTED ★ WELCOME HOME ★</span>
+            </div>
+        </div>
+
+        <!-- VIBE CHECK CONTENT -->
+        <section class="vibe-section">
+            <div class="container">
+                <div class="vibe-card hover-target">
+                    <div class="eyebrow" style="background:var(--pop-pink); transform:rotate(-2deg);">THE VIBE CHECK</div>
+                    <h2>WHAT'S THE DEAL?</h2>
+                    <p id="heroSubtitleText" class="vibe-text"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- GOODIE BAG (Bundle) -->
+        <section class="goodie-section">
+            <div class="container">
+                <h2 style="text-align:center; font-size:3rem; margin-bottom:20px;">THE GOODIE BAG</h2>
+                <p style="text-align:center; font-weight:700;">Digital Assets Included with RSVP</p>
+                
+                <div class="grid" id="bundleGrid">
+                    <!-- JS Injected -->
+                </div>
+            </div>
+        </section>
+
+        <!-- THE HYPE PERSON (Agent) -->
+        <section class="host-section">
+            <div class="container">
+                <div class="host-wrapper">
+                    <div style="position:relative; width:300px; height:300px; margin:0 auto;">
+                        <div class="host-star"></div>
+                        <img src="" id="realtorPhoto" class="host-img">
+                    </div>
+                    <div style="flex:1; min-width:300px;">
+                        <div class="eyebrow" style="background:var(--pop-blue);">YOUR HYPE PERSON</div>
+                        <h2 style="font-size:3rem; margin-bottom:20px;" id="realtorName"></h2>
+                        <div style="background:var(--c-ink); color:#fff; padding:20px; border-radius:20px 20px 20px 0; margin-bottom:20px;">
+                            <p id="realtorBio" style="font-size:1.1rem; margin:0;"></p>
+                        </div>
+                        <div class="contact-social-wrapper">
+                            <div id="contactDetails"></div>
+                            <div class="host-links" id="socialLinks">
+                                <!-- JS Injected -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- THE GUEST LIST (Form) -->
+        <section class="rsvp-section" id="rsvp">
+            <div class="container">
+                <div class="clipboard">
+                    <h2 style="color:#fff; font-size:2.5rem; text-shadow:4px 4px 0px var(--c-ink);">GET ON THE LIST</h2>
+                    <p style="margin-bottom:30px; font-weight:700;">Unlock the floorplans & price deets.</p>
+                    
+                    <form id="popForm">
+                        <input type="text" id="fullName" class="input-pop hover-target" placeholder="YOUR NAME" required>
+                        <input type="email" id="email" class="input-pop hover-target" placeholder="YOUR EMAIL" required>
+                        <input type="tel" id="phone" class="input-pop hover-target" placeholder="YOUR DIGITS (PHONE)" required inputmode="numeric">
+                        
+                        <div class="check-wrap">
+                            <input type="checkbox" id="consentCheckbox" required>
+                            <label for="consentCheckbox" id="consentLabel" style="font-size: 0.8rem; text-align: left; display: block; line-height: 1.4;"></label>
+                        </div>
+
+                        <button type="submit" class="btn-pop hover-target" style="width:100%; font-size:1.5rem; background:var(--pop-lime);" id="submitBtn">
+                            LET'S GOOOO
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-content">
+                <h2 id="footerBrand"></h2>
+                <p id="footerAddress" style="margin:20px 0; opacity:0.7;"></p>
+                <a href="#" id="privacyLink" style="color:#fff;">PRIVACY STUFF</a>
+            </div>
+            <img id="footerLogo" class="footer-logo" alt="Brokerage Logo">
+        </footer>
+
+    </main>
+
+    <!-- VIBE CHECK MODAL -->
+    <div class="modal-takeover" id="modal">
+        <h1 style="font-size:4rem; color:#fff; text-shadow:6px 6px 0px var(--c-ink); text-align:center; margin-bottom:40px;">VIBE CHECK</h1>
+        <div id="modalContent" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
+    </div>
+
+    <script>
+        /**
+         * ==================================================================
+         * 1. SAFETY CONFIG
+         * ==================================================================
+         */
+        if (typeof window.config === 'undefined') {
+            window.config = {
+                meta: { titlePrefix: "Party", privacyPolicyLink: "#" },
+                property: { streetAddress: "777 Electric Ave", heroSubtitle: "Main Stage Energy.", backgroundImageUrl: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?q=80&w=2070&auto=format&fit=crop" },
+                realtor: { fullName: "Zoe Miller", bio: "I sell cool houses to cool people.", phone: "555-0123", email: "zoe@party.com", photoUrl: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=800", social: { instagram: "#" } },
+                brokerage: { name: "Neon Realty", address: "Venice Beach, CA", logoUrl: "" },
+                openHouse: { bundleItems: [{ icon: "fa-music", text: "Playlist" }, { icon: "fa-map", text: "Hotspots" }] },
+                settings: { visitorWebhookUrl: "", confettiColors: ['#ff6b9d', '#ccff00', '#4d96ff'] },
+                modalQuestions: [{ id: "vibe", questionText: "What's the move?", options: [{ text: "Buying ASAP", value: "buy" }] }]
+            };
+        }
+
+        /**
+         * ==================================================================
+         * 2. INIT
+         * ==================================================================
+         */
+        document.addEventListener("DOMContentLoaded", () => {
+            applyThemeColors();
+            populateData();
+            
+            // Loader Animation
+            setTimeout(() => {
+                gsap.to("#loader", { yPercent: -100, duration: 0.8, ease: "back.in(1.7)" });
+                document.body.style.opacity = 1;
+                
+                // Ensure hero image is visible if GSAP fails or delay causes issue
+                const heroImgFrame = document.querySelector('.hero-img-frame');
+                if (heroImgFrame) heroImgFrame.style.opacity = 1;
+
+                initAnimations();
+            }, 800);
+
+            setupFormLogic();
+            setupMobileNavScroll();
+        });
+
+        function applyThemeColors() {
+            if (config.settings) {
+                const root = document.documentElement;
+                if (config.settings.primaryColor) root.style.setProperty('--c-ink', config.settings.primaryColor);
+                if (config.settings.secondaryColor) root.style.setProperty('--pop-blue', config.settings.secondaryColor);
+                if (config.settings.accentColor) root.style.setProperty('--pop-pink', config.settings.accentColor);
+                if (config.settings.neutralColor) root.style.setProperty('--c-bg', config.settings.neutralColor);
+            }
+        }
+
+        function setupMobileNavScroll() {
+            const nav = document.querySelector('nav');
+            const contactSection = document.querySelector('.host-section'); // "Hype Person" section
+            
+            if (!contactSection) return;
+
+            window.addEventListener('scroll', () => {
+                // Only run on mobile width
+                if (window.innerWidth <= 768) {
+                    const triggerBottom = contactSection.getBoundingClientRect().bottom;
+                    // If we've scrolled past the bottom of the contact section (triggerBottom < windowHeight)
+                    // actually, let's say if the bottom of contact section is above the viewport bottom
+                    // or simpler: if we are looking at the RSVP section or footer.
+                    
+                    // Logic: hide nav when the bottom of the contact section leaves the viewport (goes up)
+                    // triggerBottom is relative to viewport. If < 0, it's way above. 
+                    // We want to hide it when we are scrolling down into the form.
+                    
+                    // Let's try: if triggerBottom < window.innerHeight - 100
+                    if (triggerBottom < window.innerHeight - 100) {
+                        nav.classList.add('nav-hidden');
+                    } else {
+                        nav.classList.remove('nav-hidden');
+                    }
+                } else {
+                    nav.classList.remove('nav-hidden');
+                }
+            });
+        }
+
+        function populateData() {
+            const cfg = window.config;
+
+            // Basic Text
+            document.title = cfg.meta.pageTitlePrefix;
+            document.getElementById('navBrand').innerText = cfg.property.streetAddress.toUpperCase();
+            document.getElementById('propTitle').innerText = cfg.property.streetAddress;
+            document.getElementById('propAddress').innerText = cfg.property.streetAddress;
+            document.getElementById('heroImg').src = cfg.property.backgroundImageUrl;
+            
+            // Scroller Text
+            const scroller = document.getElementById('scrollingText');
+            scroller.innerText = "★ OPEN HOUSE ".repeat(15);
+
+            // Vibe Check Text
+            if(cfg.property.heroSubtitle) {
+                document.getElementById('heroSubtitleText').innerText = cfg.property.heroSubtitle;
+            } else {
+                document.querySelector('.vibe-section').style.display = 'none';
+            }
+
+            // Bundle Grid
+            const grid = document.getElementById('bundleGrid');
+            if(cfg.openHouse && cfg.openHouse.bundleItems) {
+                cfg.openHouse.bundleItems.forEach(item => {
+                    grid.innerHTML += `
+                        <div class="card hover-target">
+                            <div class="card-icon"><i class="${item.icon}"></i></div>
+                            <h3>${item.text}</h3>
+                            <p>INCLUDED</p>
+                        </div>
+                    `;
+                });
+            }
+
+            // Host
+            const r = cfg.realtor;
+            document.getElementById('realtorName').innerText = r.fullName;
+            document.getElementById('realtorBio').innerText = r.bio;
+            document.getElementById('realtorPhoto').src = r.photoUrl;
+            
+            // Contact Details
+            const contactDiv = document.getElementById('contactDetails');
+            contactDiv.innerHTML = `
+                <div class="contact-details">
+                    <a href="mailto:${r.email}" class="contact-item hover-target"><i class="fas fa-envelope"></i> ${r.email}</a>
+                    <a href="tel:${r.phone}" class="contact-item hover-target"><i class="fas fa-phone-alt"></i> ${r.phone}</a>
+                </div>
+            `;
+
+            // Social Links
+            const links = document.getElementById('socialLinks');
+            links.innerHTML = '';
+            const iconMap = {
+                facebook: 'fab fa-facebook',
+                instagram: 'fab fa-instagram',
+                linkedin: 'fab fa-linkedin',
+                twitter: 'fab fa-twitter',
+                youtube: 'fab fa-youtube',
+                tiktok: 'fab fa-tiktok',
+                website: 'fas fa-globe'
+            };
+
+            if(r.social) {
+                Object.keys(r.social).forEach(key => {
+                    const url = r.social[key];
+                    if(url) {
+                        const iconClass = iconMap[key.toLowerCase()] || 'fas fa-link';
+                        links.innerHTML += `<a href="${url}" target="_blank" class="hover-target"><i class="${iconClass}"></i></a>`;
+                    }
+                });
+            }
+
+            // Footer & Consent
+            const privacyLink = `<a href="${cfg.meta.privacyPolicyLink}" target="_blank" style="color:inherit; text-decoration:underline;">Privacy Policy</a>`;
+            document.getElementById('consentLabel').innerHTML = 
+                `I agree to be contacted by ${cfg.brokerage.name} via call, email, and text. To opt-out, you can reply ‘stop’ at any time or click the unsubscribe link in the emails. Message and data rates may apply. ${privacyLink}`;
+
+            document.getElementById('privacyLink').href = cfg.meta.privacyPolicyLink;
+            document.getElementById('footerBrand').innerText = cfg.brokerage.name;
+            document.getElementById('footerAddress').innerText = cfg.brokerage.address;
+            document.getElementById('footerLogo').src = cfg.brokerage.logoUrl;
+        }
+
+        function initAnimations() {
+            // Lenis
+            const lenis = new Lenis();
+            function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+            requestAnimationFrame(raf);
+
+            // Marquee Loop
+            const marqueeInner = document.querySelector('.marquee-inner');
+            if (marqueeInner) {
+                marqueeInner.innerHTML += marqueeInner.innerHTML; // Duplicate
+                gsap.to(marqueeInner, { xPercent: -50, duration: 15, ease: "none", repeat: -1 });
+            }
+
+            // Scroll Triggers
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // Removing the opacity: 0 from logic here to rely on CSS or default state if this fails, 
+            // but keeping the animation. We set opacity to 1 in the timeout above to be safe.
+            gsap.from(".hero-img-frame", {
+                rotation: -10, y: 100, opacity: 0, duration: 1, ease: "elastic.out(1, 0.5)", delay: 0.5
+            });
+
+            gsap.utils.toArray('.card').forEach((card, i) => {
+                gsap.from(card, {
+                    y: 100, rotation: i%2===0 ? -5 : 5, opacity: 0, duration: 0.8,
+                    scrollTrigger: { trigger: card, start: "top 85%" }
+                });
+            });
+        }
+
+        // --- FORM LOGIC ---
+        let storedPayload = null;
+        let collectedAnswers = {};
+
+        function setupFormLogic() {
+            const cfg = window.config;
+            
+            // Phone Mask
+            document.getElementById('phone').addEventListener('input', function (e) {
+                var x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+                e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+            });
+
+            document.getElementById('popForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('submitBtn');
+                btn.innerText = "SENDING IT...";
+                
+                storedPayload = {
+                    formType: "initial_contact",
+                    fullName: document.getElementById('fullName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    propertyAddress: `${cfg.property.streetAddress}, ${cfg.property.cityStateZip}`,
+                    agentEmail: cfg.realtor.email,
+                    submittedAt: new Date().toISOString(),
+                    questions: [],
+                    ...(cfg.deploymentInfo || {})
+                };
+
+                if(cfg.settings.visitorWebhookUrl) {
+                    try {
+                        await fetch(cfg.settings.visitorWebhookUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(storedPayload),
+                            mode: 'cors'
+                        });
+                    } catch(err) {}
+                }
+
+                setTimeout(() => showModalStep(0), 1000);
+            });
+        }
+
+        function showModalStep(index) {
+            const cfg = window.config;
+            const modal = document.getElementById('modal');
+            const content = document.getElementById('modalContent');
+            modal.classList.add('active');
+            content.innerHTML = '';
+
+            if (index < cfg.modalQuestions.length) {
+                const q = cfg.modalQuestions[index];
+                let html = `
+                    <h3 style="color:#fff; font-size:2rem; margin-bottom:30px; text-transform:uppercase;">${q.questionText}</h3>
+                `;
+                q.options.forEach(opt => {
+                    const txt = opt.text || opt;
+                    const val = opt.value || opt;
+                    html += `<button class="vibe-btn hover-target" onclick="handleAnswer('${q.id}', '${val}', ${index})">${txt}</button>`;
+                });
+                content.innerHTML = html;
+            } else {
+                finishSequence();
+            }
+        }
+
+        window.handleAnswer = (qid, val, idx) => {
+            collectedAnswers[qid] = val;
+            showModalStep(idx + 1);
+        };
+
+        function finishSequence() {
+            const cfg = window.config;
+            
+            // Process Answers into Array
+            const questions = cfg.modalQuestions || [];
+            const modalQuestionResponses = [];
+            
+            for (const [qId, answerVal] of Object.entries(collectedAnswers)) {
+                const qObj = questions.find(q => q.id === qId);
+                if (qObj) {
+                    const optObj = qObj.options.find(o => o.value === answerVal);
+                    modalQuestionResponses.push({
+                        question: qObj.questionText,
+                        answer: optObj ? optObj.text : answerVal
+                    });
+                }
+            }
+            
+            const finalPayload = {
+                ...storedPayload,
+                formType: "modal_answers",
+                submittedAt: new Date().toISOString(),
+                questions: modalQuestionResponses
+            };
+
+            if(cfg.settings.visitorWebhookUrl) {
+                fetch(cfg.settings.visitorWebhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(finalPayload),
+                    mode: 'cors'
+                });
+            }
+
+            document.getElementById('modalContent').innerHTML = `
+                <h1 style="font-size:5rem; color:#fff; text-shadow:6px 6px 0px var(--c-ink);">BOOM! 💥</h1>
+                <p style="color:#fff; font-size:1.5rem; margin:20px 0; font-weight:700;">YOU'RE ON THE LIST.</p>
+                <button onclick="location.reload()" class="btn-pop hover-target" style="margin-top:20px; font-size:1.5rem;">PEACE OUT ✌️</button>
+            `;
+            
+            // Confetti
+            const colors = cfg.settings.confettiColors || ['#ff6b9d', '#ccff00'];
+            confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }, colors: colors, shapes: ['circle', 'square'] });
+        }
+
+        // CURSOR
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.top = e.clientY + 'px';
+            cursor.style.left = e.clientX + 'px';
+        });
+        document.addEventListener('mouseover', (e) => {
+            if(e.target.classList.contains('hover-target') || e.target.tagName === 'BUTTON') {
+                cursor.classList.add('hover');
+            } else {
+                cursor.classList.remove('hover');
+            }
+        });
+
+    </script>
+</body>
+</html>

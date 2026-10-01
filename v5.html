@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open House</title> <!-- Set by JS -->
+
+    <!-- ★★★ START: SOCIAL SHARE META TAGS - EDIT MANUALLY FOR EACH PAGE ★★★ -->
+    <meta property="og:title" content="Open House" />
+    <meta property="og:description" content="Welcome to the Open House" />
+    <meta property="og:image" content="https://www.gta-homes.com/wp-content/uploads/what-is-an-open-house-01.jpg" /> <!-- Match Config -->
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Open House" />
+    <meta name="twitter:description" content="Welcome to the Open House" />
+    <meta name="twitter:image" content="https://www.gta-homes.com/wp-content/uploads/what-is-an-open-house-01.jpg" /> <!-- Match Config -->
+    <!-- ★★★ END: SOCIAL SHARE META TAGS ★★★ -->
+
+    <!-- AVANT GARDE FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- ANIMATION ENGINE -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="config.js"></script>
+
+    <style>
+        /* 
+         * ----------------------------------------------------------
+         * 1. MOMA / BRUTALIST SYSTEM
+         * ----------------------------------------------------------
+         */
+        :root {
+            --bg-color: #e6e6e6; /* Off-white gallery wall */
+            --ink: #0a0a0a; /* Deep Black */
+            --accent: #2727e6; /* International Klein Blue */
+            --neon: #ccff00; /* Acid Green (Art Tech) */
+            
+            --grid-line: 1px solid rgba(10, 10, 10, 0.15); /* Overridden by applyThemeColors */
+            --border-heavy: 2px solid var(--ink);
+            
+            --font-art: 'Syne', sans-serif;
+            --font-tech: 'Space Grotesk', sans-serif;
+            
+            --pad: clamp(20px, 5vw, 60px);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            cursor: none; /* Custom cursor only */
+        }
+
+        html, body {
+            margin: 0; padding: 0;
+            background: var(--bg-color);
+            color: var(--ink);
+            font-family: var(--font-tech);
+            overflow-x: hidden;
+            font-kerning: normal;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 
+         * ----------------------------------------------------------
+         * 2. INTERACTION LAYER (The Lens)
+         * ----------------------------------------------------------
+         */
+        #cursor {
+            position: fixed; top: 0; left: 0;
+            width: 20px; height: 20px;
+            background: var(--ink);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s;
+            mix-blend-mode: difference; /* The Magic Art Effect */
+        }
+        #cursor.grow { transform: translate(-50%, -50%) scale(4); background: #fff; }
+        #cursor.drag { transform: translate(-50%, -50%) scale(1); width: 80px; height: 80px; border-radius: 0; content: "VIEW"; display:flex; align-items:center; justify-content:center; color: black; font-size: 10px; }
+
+        /* Background Noise Canvas */
+        #art-canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0; opacity: 0.08; pointer-events: none;
+        }
+
+        /* 
+         * ----------------------------------------------------------
+         * 3. LAYOUT GRID
+         * ----------------------------------------------------------
+         */
+        .wrapper {
+            position: relative; z-index: 10;
+            border-left: var(--grid-line);
+            border-right: var(--grid-line);
+            max-width: 1400px; margin: 0 auto;
+            background: var(--bg-color);
+        }
+
+        .grid-row {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            border-bottom: var(--grid-line);
+        }
+
+        .col-span-full { grid-column: 1 / -1; }
+        .col-span-6 { grid-column: span 6; }
+        
+        @media (max-width: 768px) {
+            .col-span-6 { grid-column: 1 / -1; }
+        }
+
+        /* Typography */
+        h1 {
+            font-family: var(--font-art);
+            font-size: clamp(3rem, 12vw, 14rem);
+            font-weight: 800;
+            line-height: 0.8;
+            text-transform: uppercase;
+            margin: 0;
+            letter-spacing: -0.04em;
+            color: var(--ink);
+        }
+
+        h2 {
+            font-family: var(--font-tech);
+            font-size: clamp(1.5rem, 4vw, 3rem);
+            text-transform: uppercase;
+            font-weight: 300;
+            margin: 0;
+        }
+
+        .label {
+            font-family: var(--font-tech);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            display: block;
+            opacity: 0.6;
+        }
+        
+        .running-text {
+            white-space: nowrap;
+            overflow: hidden;
+            font-family: var(--font-art);
+            font-size: 6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-bottom: var(--border-heavy);
+            border-top: var(--border-heavy);
+            background: var(--ink);
+            color: var(--bg-color);
+            padding: 1rem 0;
+        }
+        
+        /* 
+         * ----------------------------------------------------------
+         * 4. SECTIONS
+         * ----------------------------------------------------------
+         */
+        
+        /* Navigation */
+        nav {
+            position: fixed; top: 0; left: 0; width: 100%;
+            display: flex; justify-content: space-between;
+            padding: 20px; z-index: 100;
+            mix-blend-mode: exclusion;
+            pointer-events: none;
+        }
+        .nav-item { pointer-events: all; color: #fff; font-family: var(--font-tech); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
+
+        /* Hero */
+        .hero-section {
+            min-height: 100vh;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            padding: var(--pad);
+            padding-bottom: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-img {
+            position: absolute;
+            top: 20%; right: 10%;
+            width: 40vw; height: 50vh;
+            background-size: cover; background-position: center;
+            filter: grayscale(100%) contrast(120%);
+            z-index: -1;
+            transition: filter 0.5s;
+        }
+        .hero-img:hover { filter: grayscale(0%); }
+
+        /* The Exhibits (Amenities) */
+        .exhibit-item {
+            padding: var(--pad);
+            border-right: var(--grid-line);
+            position: relative;
+            min-height: 400px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            transition: background 0.3s;
+        }
+        .exhibit-item:last-child { border-right: none; }
+        .exhibit-item:hover { background: #fff; }
+        .exhibit-number { font-size: 4rem; font-family: var(--font-art); opacity: 0.1; position: absolute; top: 20px; right: 20px; }
+
+        /* The Curator (Agent) */
+        .curator-grid { display: grid; grid-template-columns: 1fr 1fr; }
+        .curator-img-box { height: 100%; min-height: 600px; overflow: hidden; border-right: var(--border-heavy); position: relative; }
+        .curator-img { width: 100%; height: 100%; object-fit: cover; transition: transform 1s; display: block; }
+        .curator-info { padding: var(--pad); display: flex; flex-direction: column; justify-content: center; }
+
+        /* Ticket Machine (Form) */
+        .ticket-machine {
+            background: var(--ink);
+            color: var(--bg-color);
+            padding: var(--pad);
+            position: relative;
+        }
+        
+        @media (max-width: 768px) {
+            #formHeading { font-size: 2.5rem !important; line-height: 1.1; }
+            #formSubtitle { font-size: 0.9rem !important; margin-top: 10px; display: block; }
+        }
+
+        .input-brutal {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #fff;
+            font-family: var(--font-tech);
+            font-size: 2rem;
+            color: var(--bg-color);
+            padding: 20px 0;
+            margin-bottom: 40px;
+            border-radius: 0;
+        }
+        .input-brutal:focus { outline: none; border-bottom-color: var(--neon); }
+        .input-brutal::placeholder { color: #fff; }
+
+        .btn-ticket {
+            width: 100%;
+            padding: 30px;
+            background: var(--bg-color);
+            color: var(--ink);
+            border: none;
+            font-family: var(--font-art);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            transition: 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-ticket:hover { background: var(--neon); color: var(--ink); letter-spacing: 2px; }
+        .btn-ticket:active { transform: scale(0.98); }
+
+        /* 
+         * ----------------------------------------------------------
+         * 5. OVERLAYS
+         * ----------------------------------------------------------
+         */
+        .modal-wrap {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--neon);
+            z-index: 5000;
+            transform: translateY(100%);
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        .modal-wrap.active { transform: translateY(0); }
+        .modal-inner { width: 100%; max-width: 800px; padding: 40px; background: white; border: 4px solid black; box-shadow: 20px 20px 0px black; }
+
+        .choice-btn {
+            display: block; width: 100%; text-align: left;
+            border: 2px solid black; background: transparent;
+            padding: 20px; margin-bottom: 10px;
+            font-family: var(--font-tech); font-size: 1.2rem; font-weight: bold;
+            transition: 0.2s;
+        }
+        .choice-btn:hover { background: black; color: var(--neon); transform: translateX(10px); }
+
+        /* Intro Loader */
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--ink); color: var(--bg-color);
+            z-index: 99999; display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-tech); font-size: 5rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- LOADER -->
+    <div id="loader">
+        <span id="counter">000</span>
+    </div>
+
+    <!-- MOUSE FX -->
+    <div id="cursor"></div>
+    <canvas id="art-canvas"></canvas>
+    <canvas id="confetti-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:6000;"></canvas>
+
+    <!-- NAV -->
+    <nav>
+        <div class="nav-item" id="navRealtorName">EXHIBITION NO. 882</div>
+        <div class="nav-item" id="navDate"></div>
+    </nav>
+
+    <div class="wrapper">
+        
+        <!-- HERO -->
+        <section class="hero-section" id="hero">
+            <div class="hero-img hover-target" id="heroBg"></div>
+            
+            <div style="margin-bottom: 20px;">
+                <span class="label">THE SUBJECT</span>
+                <div style="height: 2px; width: 50px; background: var(--ink);"></div>
+            </div>
+
+            <h1 id="heroTitle" class="hover-target">THE<br>RESIDENCE</h1>
+            
+            <div class="grid-row" style="margin-top: 60px; border-top: var(--grid-line); padding-top: 20px;">
+                <div class="col-span-6">
+                    <span class="label">LOCATION</span>
+                    <h2 style="font-size: 1.2rem; font-weight: 600;" id="propAddress">1400 PACIFIC AVE</h2>
+                </div>
+                <div class="col-span-6" style="text-align: right;">
+                    <span class="label">STATUS</span>
+                    <h2 style="font-size: 1.2rem; color: var(--accent);">OPEN FOR VIEWING</h2>
+                </div>
+            </div>
+        </section>
+
+        <!-- MARQUEE -->
+        <div class="running-text">
+            <div class="marquee-inner">
+                OPEN HOUSE &nbsp;///&nbsp; OPEN HOUSE &nbsp;///&nbsp; OPEN HOUSE &nbsp;///&nbsp;
+            </div>
+        </div>
+
+        <!-- EXHIBITS (Amenities) -->
+        <section id="exhibits">
+            <div style="padding: var(--pad); border-bottom: var(--border-heavy);">
+                <h2>The Collection</h2>
+            </div>
+            <div class="grid-row" id="amenitiesContainer">
+                <!-- JS Injected -->
+            </div>
+        </section>
+
+        <!-- THE CURATOR -->
+        <section class="curator-grid">
+            <div class="curator-img-box">
+                <img src="" class="curator-img hover-target" id="realtorImg">
+            </div>
+            <div class="curator-info">
+                <span class="label">THE CURATOR</span>
+                <h2 style="font-size: 4rem; margin-bottom: 5px; line-height: 0.9;" id="realtorName">NAME</h2>
+                <h4 id="realtorTitle" style="font-family: var(--font-tech); font-size: 1.5rem; margin-bottom: 30px; margin-top: 0; font-weight: 400;">TITLE</h4>
+                <p style="font-size: 1.5rem; line-height: 1.4; max-width: 400px; margin-bottom: 50px;" id="realtorBio"></p>
+                
+                <div style="display: flex; gap: 20px;">
+                    <a href="#" id="socialLink1" class="hover-target" style="font-size: 2rem; color: var(--ink);"><i class="fab fa-instagram"></i></a>
+                    <a href="#" id="socialLink2" class="hover-target" style="font-size: 2rem; color: var(--ink);"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- TICKET MACHINE -->
+        <section class="ticket-machine" id="register">
+            <div style="max-width: 800px; margin: 0 auto;">
+                <div style="border-bottom: 2px solid #fff; margin-bottom: 60px; padding-bottom: 20px;">
+                    <h2 style="color: white;" id="formHeading">Receive Full Home Package</h2>
+                    <span class="label" style="color: #fff;" id="formSubtitle">ENTER DETAILS TO UNLOCK COMPREHENSIVE PROPERTY DOSSIER</span>
+                </div>
+
+                <form id="signInForm">
+                    <div style="position:relative;">
+                        <input type="text" id="fullName" class="input-brutal hover-target" placeholder="FULL NAME" required>
+                    </div>
+                    <div style="position:relative;">
+                        <input type="email" id="email" class="input-brutal hover-target" placeholder="EMAIL ADDRESS" required>
+                    </div>
+                    <div style="position:relative;">
+                        <input type="tel" id="phone" class="input-brutal hover-target" placeholder="PHONE NUMBER" required inputmode="numeric">
+                    </div>
+
+                    <div style="margin-bottom: 40px; display: flex; align-items: center; gap: 20px;">
+                        <div style="width: 20px; height: 20px; border: 1px solid white; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <input type="checkbox" id="consent" required style="opacity: 0; width: 100%; height: 100%; cursor: none;">
+                            <div id="check-visual" style="width: 10px; height: 10px; background: var(--neon); display: none;"></div>
+                        </div>
+                        <label for="consent" style="font-size: 0.8rem; color: #999; line-height: 1.4;">I agree to be contacted by <span id="consentBrokerage" style="color:white;">BROKERAGE</span> via call, email, and text. To opt-out, you can reply ‘stop’ at any time or click the unsubscribe link in the emails. Message and data rates may apply. <a id="consentPrivacy" href="#" target="_blank" style="color:white; text-decoration:underline;">Privacy Policy</a></label>
+                    </div>
+
+                    <button type="submit" class="btn-ticket hover-target" id="submitBtn">SEND PACKAGE</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer style="padding: var(--pad); display: flex; justify-content: space-between; border-top: var(--border-heavy);">
+            <div>
+                <h2 style="font-size: 1.5rem;" id="footerRealtorName">MOMA STYLE</h2>
+                <p style="font-size: 0.8rem; margin-top: 10px; opacity: 0.5;" id="footerRealtorTitle">CONCEPTUAL OPEN HOUSE</p>
+                 <p style="font-size: 0.8rem; margin-top: 5px; opacity: 0.5;">
+                    <a href="#" id="footerRealtorPhone" style="color: inherit; text-decoration: none; margin-right: 10px;"></a>
+                    <a href="#" id="footerRealtorEmail" style="color: inherit; text-decoration: none;"></a>
+                </p>
+            </div>
+            <div style="text-align: right;">
+                <img id="footerBrokerageLogo" src="" alt="Brokerage Logo" style="height: 40px; margin-bottom: 10px; display: block; margin-left: auto;">
+                <p style="font-size: 0.8rem;" id="footerAddress"></p>
+                <p style="font-size: 0.8rem; margin-top: 5px;">
+                    &copy; <span id="year"></span> 
+                    <a href="#" id="footerPrivacyPolicy" style="color: inherit; text-decoration: none; margin-left: 10px;">Privacy Policy</a>
+                </p>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal-wrap" id="modalOverlay">
+        <div class="modal-inner">
+            <span class="label" style="color: var(--accent);">QUERY SEQUENCE</span>
+            <h2 style="font-size: 3rem; margin-bottom: 40px; line-height: 1;" id="modalQuestion">QUESTION TEXT</h2>
+            <div id="modalOptions"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        /**
+         * ==================================================================
+         * STATE & CONFIG
+         * ==================================================================
+         */
+        let storedInitialPayload = null;
+        let collectedAnswers = {};
+
+        /**
+         * ==================================================================
+         * SYSTEM INITIALIZATION
+         * ==================================================================
+         */
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof config === 'undefined') {
+                console.error("Config not loaded");
+                return;
+            }
+
+            applyThemeColors();
+            populateV7Data();
+            
+            // 1. Loader Sequence
+            let count = 0;
+            const counter = document.getElementById('counter');
+            const loader = document.getElementById('loader');
+            
+            const interval = setInterval(() => {
+                count += Math.floor(Math.random() * 10) + 1;
+                if (count > 100) count = 100;
+                counter.innerText = count.toString().padStart(3, '0');
+                
+                if (count === 100) {
+                    clearInterval(interval);
+                    gsap.to(loader, { yPercent: -100, duration: 1, ease: "power4.inOut", delay: 0.2 });
+                }
+            }, 30);
+
+            // 3. Animation Logic
+            setupMarquee();
+            setupAnimations();
+            initCanvas();
+            initCursor();
+
+            // Checkbox Visual Hack
+            const consentBox = document.getElementById('consent');
+            if(consentBox) {
+                consentBox.addEventListener('change', function() {
+                    document.getElementById('check-visual').style.display = this.checked ? 'block' : 'none';
+                });
+            }
+        });
+
+        function applyThemeColors() {
+            if (config.settings) {
+                const root = document.documentElement;
+                if (config.settings.primaryColor) root.style.setProperty('--ink', config.settings.primaryColor);
+                if (config.settings.secondaryColor) root.style.setProperty('--accent', config.settings.secondaryColor);
+                if (config.settings.accentColor) {
+                    root.style.setProperty('--neon', config.settings.accentColor);
+                    // Map grid-line to accentColor with opacity
+                    const accentRgb = hexToRgb(config.settings.accentColor);
+                    if (accentRgb) {
+                        root.style.setProperty('--grid-line', `1px solid rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, 0.15)`);
+                    }
+                }
+                if (config.settings.neutralColor) root.style.setProperty('--bg-color', config.settings.neutralColor);
+            }
+        }
+        
+        // Helper function to convert hex to RGB
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function populateV7Data() {
+            // Meta
+            document.title = config.meta.pageTitlePrefix;
+            document.getElementById('navRealtorName').innerText = config.realtor.fullName.toUpperCase();
+            document.getElementById('navDate').innerText = config.property.streetAddress.toUpperCase();
+            
+            // Property
+            document.getElementById('propAddress').innerText = config.property.streetAddress.toUpperCase();
+            document.getElementById('heroBg').style.backgroundImage = `url(${config.property.backgroundImageUrl})`;
+            document.getElementById('heroTitle').innerHTML = config.property.streetAddress.toUpperCase().replace(/\s/g, "<br>");
+            
+            // Amenities Grid
+            const amContainer = document.getElementById('amenitiesContainer');
+            if(config.openHouse.bundleItems) {
+                amContainer.innerHTML = '';
+                config.openHouse.bundleItems.forEach((a, i) => {
+                    amContainer.innerHTML += `
+                        <div class="col-span-6 exhibit-item hover-target">
+                            <div class="exhibit-number">${(i+1).toString().padStart(2, '0')}</div>
+                            <i class="${a.icon}" style="font-size: 2rem; margin-bottom: 20px;"></i>
+                            <div>
+                                <span class="label">EXHIBIT ${(i+1)}</span>
+                                <h3 style="font-size: 1.5rem;">${a.text.toUpperCase()}</h3>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Curator
+            document.getElementById('realtorName').innerText = config.realtor.fullName.toUpperCase();
+            document.getElementById('realtorTitle').innerText = config.realtor.title.toUpperCase();
+            document.getElementById('realtorBio').innerText = config.realtor.bio.toUpperCase();
+            document.getElementById('realtorImg').src = config.realtor.photoUrl;
+            
+            // Socials (Dynamic)
+            const curatorInfoDiv = document.querySelector('.curator-info');
+            const socialContainer = curatorInfoDiv.querySelector('div[style="display: flex; gap: 20px;"]');
+            
+            if(socialContainer && config.realtor.social) {
+                socialContainer.innerHTML = '';
+                const iconMap = { linkedin: 'fab fa-linkedin', instagram: 'fab fa-instagram', facebook: 'fab fa-facebook-f', twitter: 'fab fa-twitter', website: 'fas fa-globe' };
+                
+                Object.entries(config.realtor.social).forEach(([key, url]) => {
+                     if(url) {
+                        const icon = iconMap[key] || 'fas fa-link';
+                        socialContainer.innerHTML += `<a href="${url}" target="_blank" class="hover-target" style="font-size: 2rem; color: var(--ink);"><i class="${icon}"></i></a>`;
+                     }
+                });
+            }
+
+            // Footer
+            document.getElementById('consentBrokerage').innerText = config.brokerage.name.toUpperCase();
+            const consentPrivacy = document.getElementById('consentPrivacy');
+            if(consentPrivacy && config.meta.privacyPolicyLink) {
+                consentPrivacy.href = config.meta.privacyPolicyLink;
+            }
+
+            document.getElementById('footerAddress').innerText = config.brokerage.address.toUpperCase();
+            document.getElementById('year').innerText = new Date().getFullYear();
+            
+            document.getElementById('footerRealtorName').innerText = config.realtor.fullName.toUpperCase();
+            document.getElementById('footerRealtorTitle').innerText = config.realtor.title.toUpperCase();
+            
+            const footerLogo = document.getElementById('footerBrokerageLogo');
+            if(footerLogo && config.brokerage.logoUrl) {
+                footerLogo.src = config.brokerage.logoUrl;
+            }
+
+            const footerPrivacy = document.getElementById('footerPrivacyPolicy');
+            if(footerPrivacy && config.meta.privacyPolicyLink) {
+                footerPrivacy.href = config.meta.privacyPolicyLink;
+            }
+            
+            const footerPhone = document.getElementById('footerRealtorPhone');
+            if(footerPhone) {
+                footerPhone.innerText = config.realtor.phone;
+                footerPhone.href = `tel:${config.realtor.phone.replace(/\D/g,'')}`;
+            }
+            
+            const footerEmail = document.getElementById('footerRealtorEmail');
+            if(footerEmail) {
+                footerEmail.innerText = config.realtor.email.toUpperCase();
+                footerEmail.href = `mailto:${config.realtor.email}`;
+            }
+        }
+
+        /**
+         * ==================================================================
+         * INTERACTION & FORM
+         * ==================================================================
+         */
+        const form = document.getElementById('signInForm');
+
+        // Phone Formatter
+        document.getElementById('phone').addEventListener('input', function (e) {
+            var x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+            e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = "SENDING...";
+            btn.style.background = "var(--neon)";
+            
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const submittedAt = new Date().toISOString();
+
+            const initialPayload = {
+                formType: "initial_contact",
+                email: email,
+                fullName: fullName,
+                phone: phone,
+                propertyAddress: `${config.property.streetAddress}, ${config.property.cityStateZip}`,
+                submittedAt: submittedAt,
+                questions: [],
+                agentEmail: config.realtor.email,
+                ...(config.deploymentInfo || {})
+            };
+            
+            storedInitialPayload = initialPayload;
+
+            const visitorUrl = config.settings.visitorWebhookUrl;
+            if(visitorUrl) {
+                 try {
+                    fetch(visitorUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(initialPayload)
+                    });
+                } catch(err) { console.error(err); }
+            }
+
+            setTimeout(() => {
+                showModal(0);
+            }, 1000);
+        });
+
+        function showModal(index) {
+            const modal = document.getElementById('modalOverlay');
+            const questionEl = document.getElementById('modalQuestion');
+            const optionsEl = document.getElementById('modalOptions');
+            
+            modal.classList.add('active');
+            optionsEl.innerHTML = '';
+
+            const questions = config.modalQuestions || [];
+
+            if(index < questions.length) {
+                const q = questions[index];
+                questionEl.innerText = q.questionText.toUpperCase();
+                
+                q.options.forEach(opt => {
+                    const val = opt.value || opt;
+                    const txt = opt.text || opt;
+
+                    const btn = document.createElement('button');
+                    btn.className = 'choice-btn hover-target';
+                    btn.innerText = `> ${txt.toUpperCase()}`;
+                    btn.onclick = () => {
+                        collectedAnswers[q.id] = val;
+                        showModal(index + 1);
+                    };
+                    optionsEl.appendChild(btn);
+                });
+            } else {
+                finishSequence();
+            }
+        }
+
+        async function finishSequence() {
+            // Process Answers
+            const questions = config.modalQuestions || [];
+            const modalQuestionResponses = [];
+
+             for (const [qId, answerVal] of Object.entries(collectedAnswers)) {
+                const qObj = questions.find(q => q.id === qId);
+                if (qObj) {
+                    const optObj = qObj.options.find(o => o.value === answerVal);
+                    modalQuestionResponses.push({
+                        question: qObj.questionText,
+                        answer: optObj ? optObj.text : answerVal
+                    });
+                }
+            }
+
+            const finalPayload = {
+                ...(storedInitialPayload || {}),
+                formType: "modal_answers",
+                submittedAt: new Date().toISOString(),
+                questions: modalQuestionResponses
+            };
+
+            const visitorUrl = config.settings.visitorWebhookUrl;
+            if (visitorUrl) {
+                try {
+                    await fetch(visitorUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(finalPayload)
+                    });
+                } catch (err) {
+                    console.error("Final submit error", err);
+                }
+            }
+
+            const modal = document.getElementById('modalOverlay');
+            modal.innerHTML = `
+                <div class="modal-inner" style="text-align:center; border:none; background:black; color:white;">
+                    <h1 style="color: var(--neon); font-size: 6rem;">PACKAGE<br>SENT</h1>
+                    <p style="font-family: var(--font-tech); margin-top: 20px;">COMPLETE PROPERTY DOSSIER SENT TO EMAIL.</p>
+                    <button onclick="location.reload()" class="btn-ticket hover-target" style="margin-top: 40px; background: white; color: black;">CLOSE SEQUENCE</button>
+                </div>
+            `;
+            fireGeometricConfetti();
+        }
+
+        /**
+         * ==================================================================
+         * FX & ANIMATION
+         * ==================================================================
+         */
+        
+        // Marquee
+        function setupMarquee() {
+            const inner = document.querySelector('.marquee-inner');
+            // Duplicate content for seamless loop
+            inner.innerHTML += inner.innerHTML + inner.innerHTML;
+            
+            gsap.to(inner, {
+                xPercent: -50,
+                duration: 20,
+                ease: "none",
+                repeat: -1
+            });
+        }
+
+        // Scroll Animations
+        function setupAnimations() {
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // Parallax Image
+            gsap.to("#heroBg", {
+                yPercent: 30,
+                ease: "none",
+                scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: true }
+            });
+
+            // Exhibits Stagger
+            gsap.from(".exhibit-item", {
+                y: 100, opacity: 0, stagger: 0.1, duration: 1, ease: "power4.out",
+                scrollTrigger: { trigger: "#exhibits", start: "top 75%" }
+            });
+        }
+
+        // Geometric Confetti (Squares and Triangles)
+        function fireGeometricConfetti() {
+            const colors = config.settings.confettiColors || ['#ccff00', '#000000', '#ffffff', '#2727e6'];
+            const end = Date.now() + 3000;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: colors,
+                    shapes: ['square'], 
+                    scalar: 1.2
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: colors,
+                    shapes: ['square'],
+                    scalar: 1.2
+                });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        }
+
+        // Custom Cursor
+        function initCursor() {
+            const cursor = document.getElementById('cursor');
+            
+            document.addEventListener('mousemove', e => {
+                cursor.style.top = e.clientY + 'px';
+                cursor.style.left = e.clientX + 'px';
+            });
+
+            document.addEventListener('mouseover', e => {
+                if(e.target.classList.contains('hover-target') || e.target.tagName === 'BUTTON') {
+                    cursor.classList.add('grow');
+                } else {
+                    cursor.classList.remove('grow');
+                }
+            });
+        }
+
+        // Canvas: Kinetic Noise Grid
+        function initCanvas() {
+            const canvas = document.getElementById('art-canvas');
+            const ctx = canvas.getContext('2d');
+            let w, h;
+
+            function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+            window.addEventListener('resize', resize);
+            resize();
+
+            function draw() {
+                ctx.clearRect(0, 0, w, h);
+                ctx.fillStyle = '#0a0a0a';
+                
+                // Draw a grid of tiny squares
+                const spacing = 40;
+                for(let x = 0; x < w; x += spacing) {
+                    for(let y = 0; y < h; y += spacing) {
+                        if(Math.random() > 0.9) {
+                            ctx.fillRect(x, y, 2, 2);
+                        }
+                    }
+                }
+                // Random Glitch Lines
+                if(Math.random() > 0.95) {
+                    ctx.fillRect(0, Math.random()*h, w, 1);
+                }
+                requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+    </script>
+</body>
+</html>

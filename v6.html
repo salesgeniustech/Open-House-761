@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open House</title> <!-- Set by JS -->
+
+    <!-- ★★★ START: SOCIAL SHARE META TAGS - EDIT MANUALLY FOR EACH PAGE ★★★ -->
+    <meta property="og:title" content="Open House" />
+    <meta property="og:description" content="Welcome to the Open House" />
+    <meta property="og:image" content="https://www.gta-homes.com/wp-content/uploads/what-is-an-open-house-01.jpg" /> <!-- Match Config -->
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Open House" />
+    <meta name="twitter:description" content="Welcome to the Open House" />
+    <meta name="twitter:image" content="https://www.gta-homes.com/wp-content/uploads/what-is-an-open-house-01.jpg" /> <!-- Match Config -->
+    <!-- ★★★ END: SOCIAL SHARE META TAGS ★★★ -->
+
+    <!-- FONTS: Modern Luxury -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- LIBRARIES -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+    <script src="https://unpkg.com/split-type"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- LOAD CONFIG -->
+    <script src="config.js"></script>
+
+    <style>
+        /* 
+         * 1. PALETTE: PURE WHITE & CHARCOAL
+         */
+        :root {
+            --bg: #ffffff;
+            --bg-subtle: #fafafa;
+            --text: #111111;
+            --text-grey: #888888;
+            --border: rgba(0, 0, 0, 0.08);
+            --accent: #111111; /* Pure Black for luxury contrast */
+            
+            --font-serif: 'Bodoni Moda', serif;
+            --font-sans: 'Plus Jakarta Sans', sans-serif;
+            
+            --ease-lux: cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        * { box-sizing: border-box; cursor: none; }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-sans);
+            overflow-x: hidden;
+            opacity: 0; /* FOUC prevention */
+            transition: opacity 0.5s ease;
+        }
+
+        /* GRAIN & CURSOR */
+        .grain {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            opacity: 0.03; pointer-events: none; z-index: 9000;
+        }
+
+        .cursor {
+            position: fixed; top: 0; left: 0; width: 10px; height: 10px;
+            background: var(--text); border-radius: 50%; pointer-events: none; z-index: 10000;
+            transform: translate(-50%, -50%); transition: width 0.3s, height 0.3s, opacity 0.3s;
+        }
+        .cursor.hover {
+            width: 60px; height: 60px; background: transparent; border: 1px solid var(--text);
+        }
+
+        /* TYPOGRAPHY */
+        h1, h2, h3 { font-family: var(--font-serif); font-weight: 400; margin: 0; line-height: 1.1; }
+        p { color: var(--text-grey); line-height: 1.7; }
+        .label {
+            font-family: var(--font-sans); font-size: 0.7rem; letter-spacing: 0.2em;
+            text-transform: uppercase; color: var(--text-grey); display: block; margin-bottom: 1.5rem;
+        }
+        .char { display: inline-block; } /* For SplitType */
+
+        /* PRELOADER */
+        .loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .loader-line { width: 0%; height: 1px; background: var(--text); margin-top: 20px; }
+
+        /* 
+         * SECTIONS 
+         */
+        section { position: relative; width: 100%; padding: 10vh 5vw; }
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        /* NAV (Minimal) */
+        nav {
+            position: fixed; top: 0; left: 0; width: 100%; padding: 2rem 5vw;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 100; mix-blend-mode: difference; color: #fff; pointer-events: none;
+        }
+        .nav-brand { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 600; pointer-events: auto; }
+        .nav-info { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; pointer-events: auto; }
+
+        /* HERO */
+        .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding-top: 15vh; }
+        .hero-title { font-size: clamp(4rem, 12vw, 10rem); text-align: center; margin-bottom: 2rem; }
+        .hero-meta {
+            display: flex; justify-content: space-between; border-top: 1px solid var(--border);
+            padding-top: 2rem; max-width: 800px; margin: 0 auto 4rem auto;
+        }
+        .meta-item { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-grey); }
+        
+        .hero-visual {
+            width: 100%; height: 70vh; position: relative; overflow: hidden;
+        }
+        .hero-img {
+            width: 100%; height: 120%; object-fit: cover; filter: grayscale(10%);
+            transform: scale(1.1);
+        }
+        .hero-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff; transform-origin: top;
+        }
+
+        /* THE ASSETS (Bundle) */
+        .assets-section { background: var(--bg-subtle); }
+        .assets-header { text-align: center; max-width: 600px; margin: 0 auto 2rem auto; }
+        
+        .asset-grid {
+            display: flex; flex-wrap: wrap; justify-content: center;
+            gap: 1.5rem; background: transparent; border: none;
+        }
+        .asset-card {
+            background: var(--bg); padding: 4rem 2rem; text-align: center;
+            transition: 0.4s; cursor: pointer; border: 1px solid var(--border);
+            flex: 1 1 300px; max-width: 400px;
+        }
+        
+        /* Initial State for Animation */
+        .fade-up-entry { opacity: 0; transform: translateY(30px); }
+        .asset-card:hover { background: #fff; box-shadow: 0 20px 40px rgba(0,0,0,0.05); z-index: 2; }
+        .asset-icon { font-size: 2rem; margin-bottom: 2rem; color: var(--border); opacity: 0.8; }
+        .asset-title { font-family: var(--font-sans); font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.5rem; }
+        .asset-desc { font-size: 0.8rem; color: var(--text-grey); }
+
+        /* HOST */
+        .host-section { padding: 15vh 5vw; }
+        .host-layout { display: flex; flex-wrap: wrap; gap: 5rem; align-items: center; justify-content: center; }
+        .host-image-container {
+            width: 350px; height: 450px; position: relative;
+        }
+        .host-img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(20%); }
+        .host-frame {
+            position: absolute; top: -20px; left: 20px; width: 100%; height: 100%;
+            border: 1px solid var(--text); z-index: -1;
+        }
+        
+        .host-content { max-width: 500px; }
+        .host-name { font-size: 3rem; margin-bottom: 1rem; }
+        .host-bio { margin-bottom: 3rem; }
+        .contact-list {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+            border-top: 1px solid var(--border); padding-top: 2rem;
+        }
+        .contact-link {
+            font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;
+            text-decoration: none; color: var(--text); display: block; margin-bottom: 5px;
+            transition: 0.3s;
+        }
+        .contact-link:hover { opacity: 0.5; }
+
+        /* FORM */
+        .access-section { min-height: 90vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .form-box { width: 100%; max-width: 600px; position: relative; }
+        
+        .input-clean {
+            width: 100%; background: transparent; border: none;
+            border-bottom: 1px solid var(--border); padding: 20px 0;
+            font-family: var(--font-serif); font-size: 2rem; color: var(--text);
+            text-align: center; margin-bottom: 10px; transition: 0.4s;
+        }
+        .input-clean:focus { border-bottom-color: var(--text); outline: none; }
+        .input-clean::placeholder { color: #d0d0d0; font-family: var(--font-sans); font-size: 1rem; letter-spacing: 3px; text-transform: uppercase; }
+
+        .btn-lux {
+            margin-top: 4rem;
+            padding: 20px 60px;
+            background: var(--accent); color: #fff;
+            font-family: var(--font-sans); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 3px;
+            border: none; cursor: pointer; transition: 0.4s;
+            position: relative; overflow: hidden;
+        }
+        .btn-lux:hover { background: #333; padding-right: 80px; }
+        .btn-lux::after {
+            content: '→'; position: absolute; right: 30px; top: 50%; transform: translateY(-50%);
+            opacity: 0; transition: 0.4s;
+        }
+        .btn-lux:hover::after { opacity: 1; }
+
+        .consent { margin-top: 3rem; font-size: 0.7rem; color: #aaa; }
+        .consent a { color: var(--text); text-decoration: underline; }
+
+        /* MODAL */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff; z-index: 5000;
+            display: flex; align-items: center; justify-content: center;
+            clip-path: inset(100% 0 0 0); transition: 0.8s var(--ease-lux);
+        }
+        .modal.active { clip-path: inset(0 0 0 0); }
+        .modal-content { width: 90%; max-width: 500px; text-align: center; }
+        
+        .choice-btn {
+            display: block; width: 100%; padding: 20px;
+            border: 1px solid var(--border); background: transparent;
+            margin-bottom: 10px; font-family: var(--font-sans); text-transform: uppercase; letter-spacing: 1px;
+            cursor: pointer; transition: 0.3s;
+        }
+        .choice-btn:hover { border-color: var(--text); background: var(--text); color: #fff; }
+
+        /* FOOTER */
+        footer {
+            padding: 50px 5vw; border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: flex-end;
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-grey);
+        }
+        #footerLogo { height: 30px; filter: grayscale(100%); opacity: 0.6; }
+        .social-icons a { margin-left: 15px; color: var(--text); font-size: 1.2rem; }
+
+        /* MOBILE */
+        @media(max-width: 768px) {
+            nav { display: none; }
+            .hero-title { font-size: 14vw; }
+            .hero-meta { flex-direction: column; text-align: center; gap: 10px; }
+            .host-layout { flex-direction: column-reverse; }
+            .input-clean { font-size: 1.5rem; }
+            footer { flex-direction: column; align-items: center; gap: 20px; text-align: center; }
+            .footer-right { align-items: center !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="grain"></div>
+    <div class="cursor"></div>
+    <canvas id="confetti-canvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:6000;"></canvas>
+
+    <!-- PRELOADER -->
+    <div class="loader">
+        <h2 id="loaderText" style="font-size: 2rem; letter-spacing: 5px;">RESIDENCE</h2>
+        <div class="loader-line"></div>
+    </div>
+
+    <main>
+        
+        <!-- NAV -->
+        <nav>
+            <div class="nav-brand" id="navBrand"></div>
+            <div class="nav-info">Open House Registry</div>
+        </nav>
+
+        <!-- HERO -->
+        <section class="hero">
+            <div class="container">
+                <h1 class="hero-title" id="propTitle"></h1> <!-- Populated -->
+                
+                <div class="hero-meta">
+                    <div class="meta-item" id="propCity"></div>
+                    <div class="meta-item" id="brokerageName"></div>
+                </div>
+
+                <div class="hero-visual">
+                    <div class="hero-overlay"></div>
+                    <img src="" id="heroImg" class="hero-img"> <!-- Populated -->
+                </div>
+                
+                <div id="heroSubtitleContainer" style="margin-top: 4rem; text-align: center; max-width: 1000px; margin-left: auto; margin-right: auto;">
+                     <p id="heroSubtitle" style="font-size: 1.1rem; color: var(--text); line-height: 1.6; opacity: 0;"></p> <!-- Populated -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ASSETS (The Bundle) -->
+        <section class="assets-section">
+            <div class="container">
+                <div class="assets-header">
+                    <span class="label">The Collection</span>
+                    <h2 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Digital Assets</h2>
+                </div>
+
+                <div class="asset-grid" id="assetGrid">
+                    <!-- Populated by JS -->
+                </div>
+                
+                <div style="text-align:center; margin-top:3rem;">
+                    <p style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Register below to unlock full access.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- THE LIAISON (Host) -->
+        <section class="host-section">
+            <div class="container host-layout">
+                <div class="host-content">
+                    <span class="label">The Liaison</span>
+                    <h2 class="host-name" id="realtorName"></h2> <!-- Populated -->
+                    <div id="realtorTitle" style="font-family:var(--font-sans); font-size:0.9rem; text-transform:uppercase; letter-spacing:2px; margin-bottom:2rem; color:var(--text-grey);"></div>
+                    <p class="host-bio" id="realtorBio"></p> <!-- Populated -->
+                    
+                    <div class="contact-list" id="contactList">
+                        <!-- Populated -->
+                    </div>
+                    <div id="liaisonSocials" style="margin-top: 2rem; display: flex; gap: 1.5rem; font-size: 1.2rem;"></div>
+                </div>
+                <div class="host-image-container">
+                    <div class="host-frame"></div>
+                    <img src="" id="realtorPhoto" class="host-img"> <!-- Populated -->
+                </div>
+            </div>
+        </section>
+
+        <!-- REQUEST ACCESS (Form) -->
+        <section class="access-section" id="registry">
+            <div class="form-box">
+                <span class="label">Guest Registry</span>
+                <h2 style="font-size: 3rem; margin-bottom: 3rem;">Unlock the Package</h2>
+                
+                <form id="whiteForm">
+                    <input type="text" id="fullName" class="input-clean hover-target" placeholder="Your Name" required autocomplete="name">
+                    <input type="email" id="email" class="input-clean hover-target" placeholder="Email Address" required autocomplete="email">
+                    <input type="tel" id="phone" class="input-clean hover-target" placeholder="Phone Number" required autocomplete="tel" inputmode="numeric">
+
+                    <div class="consent">
+                        <input type="checkbox" id="consentCheckbox" required style="accent-color: #000;">
+                        <span id="consentText"></span>
+                    </div>
+
+                    <button type="submit" class="btn-lux hover-target" id="submitBtn">
+                        Unlock The Portfolio
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <div id="footerBrand"></div>
+                <div id="footerAddress"></div>
+                <div style="opacity:0.5;">© <span id="year"></span></div>
+            </div>
+            
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:20px;" class="footer-right">
+                 <img id="footerLogoImg" style="height: 40px; width: auto; object-fit: contain;" alt="Brokerage Logo">
+                 <div>
+                    <a href="#" id="footerPrivacyLink" style="text-decoration:none; color:inherit; margin-right:20px;">Privacy Policy</a>
+                 </div>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- MODAL -->
+    <div class="modal" id="modalOverlay">
+        <div class="modal-content">
+            <div id="modalInner">
+                <!-- Content injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * ==================================================================
+         * 1. INIT & DATA POPULATION
+         * ==================================================================
+         */
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // Check if config exists
+            if (typeof config === 'undefined') {
+                console.error("CRITICAL: config.js not loaded. Please check the file path.");
+                document.body.innerHTML = "<div style='padding:40px; text-align:center;'><h1>Config Error</h1><p>Ensure config.js is loaded and starts with <code>window.config = {</code> or <code>const config = {</code></p></div>";
+                document.body.style.opacity = 1;
+                return;
+            }
+
+            applyThemeColors();
+            populateContent();
+            runPreloader();
+            initAnimations();
+            setupForm();
+        });
+
+        function applyThemeColors() {
+            if (config.settings) {
+                const root = document.documentElement;
+                if (config.settings.primaryColor) root.style.setProperty('--text', config.settings.primaryColor);
+                if (config.settings.secondaryColor) root.style.setProperty('--accent', config.settings.secondaryColor);
+                if (config.settings.accentColor) root.style.setProperty('--border', config.settings.accentColor);
+                if (config.settings.neutralColor) root.style.setProperty('--bg', config.settings.neutralColor);
+            }
+        }
+
+        function populateContent() {
+            const cfg = config;
+
+            // Meta
+            document.title = cfg.meta.pageTitlePrefix;
+            
+            // Nav & Footer
+            document.getElementById('navBrand').innerText = (cfg.realtor.fullName || "").toUpperCase();
+            document.querySelector('.nav-info').innerText = (cfg.property.streetAddress || "OPEN HOUSE").toUpperCase();
+            
+            document.getElementById('footerBrand').innerText = cfg.brokerage.name;
+            document.getElementById('footerAddress').innerText = cfg.brokerage.address;
+            document.getElementById('year').innerText = new Date().getFullYear();
+            
+            if(cfg.brokerage.logoUrl) {
+                document.getElementById('footerLogoImg').src = cfg.brokerage.logoUrl;
+            } else {
+                document.getElementById('footerLogoImg').style.display = 'none';
+            }
+            
+            document.getElementById('footerPrivacyLink').href = cfg.meta.privacyPolicyLink || "#";
+
+            // Consent
+            const consentHtml = `I agree to be contacted by ${cfg.brokerage.name} via call, email, and text. To opt-out, you can reply ‘stop’ at any time or click the unsubscribe link in the emails. Message and data rates may apply. <a href="${cfg.meta.privacyPolicyLink || '#'}" target="_blank">Privacy Policy</a>`;
+            document.getElementById('consentText').innerHTML = consentHtml;
+
+            // Hero
+            document.getElementById('propTitle').innerText = cfg.property.streetAddress;
+            document.getElementById('propCity').innerText = cfg.property.city;
+            document.getElementById('brokerageName').innerText = cfg.realtor.fullName;
+            document.getElementById('heroImg').src = cfg.property.backgroundImageUrl;
+            
+            // Preloader: Agent Full Name
+            const agentFullName = (cfg.realtor.fullName || "AGENT").toUpperCase();
+            document.getElementById('loaderText').innerText = agentFullName;
+            
+            document.getElementById('heroSubtitle').innerText = cfg.property.heroSubtitle;
+
+            // Assets (Bundle)
+            const grid = document.getElementById('assetGrid');
+            grid.innerHTML = '';
+            if (cfg.openHouse && cfg.openHouse.bundleItems) {
+                cfg.openHouse.bundleItems.forEach(item => {
+                    grid.innerHTML += `
+                        <div class="asset-card fade-up-entry hover-target" onclick="document.getElementById('registry').scrollIntoView({behavior:'smooth'})">
+                            <i class="fas ${item.icon} asset-icon"></i>
+                            <div class="asset-title">${item.text}</div>
+                            <div class="asset-desc">Digital Download</div>
+                        </div>
+                    `;
+                });
+                
+                // Animate assets after population
+                animateAssets();
+            }
+
+            // Realtor
+            const r = cfg.realtor;
+            document.getElementById('realtorName').innerText = r.fullName;
+            if(r.title) document.getElementById('realtorTitle').innerText = r.title;
+            document.getElementById('realtorBio').innerHTML = r.bio;
+            document.getElementById('realtorPhoto').src = r.photoUrl;
+            
+            // Contact List
+            const contacts = document.getElementById('contactList');
+            contacts.innerHTML = `
+                <div><span style="display:block; color:#aaa; font-size:0.6rem;">EMAIL</span><a href="mailto:${r.email}" class="contact-link hover-target">${r.email}</a></div>
+                <div><span style="display:block; color:#aaa; font-size:0.6rem;">PHONE</span><a href="tel:${r.phone}" class="contact-link hover-target">${r.phone}</a></div>
+            `;
+
+            // Socials (Liaison Section)
+            if (r.social) {
+                const sContainer = document.getElementById('liaisonSocials');
+                sContainer.innerHTML = '';
+                const socialMap = {
+                    facebook: 'fab fa-facebook-f',
+                    instagram: 'fab fa-instagram',
+                    linkedin: 'fab fa-linkedin-in',
+                    twitter: 'fab fa-twitter',
+                    youtube: 'fab fa-youtube',
+                    tiktok: 'fab fa-tiktok',
+                    website: 'fas fa-globe'
+                };
+
+                Object.keys(r.social).forEach(key => {
+                    const url = r.social[key];
+                    if (url) {
+                        // Default to generic link if key not found
+                        const iconClass = socialMap[key.toLowerCase()] || 'fas fa-link';
+                        sContainer.innerHTML += `<a href="${url}" target="_blank" class="hover-target" style="color:var(--text); text-decoration:none;"><i class="${iconClass}"></i></a>`;
+                    }
+                });
+            }
+        }
+
+        /**
+         * ==================================================================
+         * 2. ANIMATIONS
+         * ==================================================================
+         */
+        function runPreloader() {
+            const tl = gsap.timeline();
+            tl.to('.loader-line', { width: '100%', duration: 1.5, ease: "power2.inOut" })
+              .to('#loaderText', { y: -50, opacity: 0, duration: 1 }, "-=0.5")
+              .to('.loader', { yPercent: -100, duration: 1.2, ease: "power4.inOut" }, "-=0.2")
+              .to('.hero-overlay', { scaleY: 0, duration: 1.5, ease: "power3.out" }, "-=0.8")
+              .from('.hero-title', { y: 100, opacity: 0, duration: 1.5, ease: "power3.out" }, "-=1");
+              
+            document.body.style.opacity = 1;
+        }
+
+        function initAnimations() {
+            // Lenis
+            const lenis = new Lenis({ duration: 1.2 });
+            function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+            requestAnimationFrame(raf);
+
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Parallax
+            gsap.to('#heroImg', {
+                yPercent: 20, ease: "none",
+                scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true }
+            });
+
+            // Animate subtitle (Fade Up + Blur)
+            gsap.fromTo('#heroSubtitle', 
+                { y: 30, opacity: 0, filter: "blur(10px)" },
+                {
+                    y: 0, opacity: 1, filter: "blur(0px)", duration: 1.2, ease: "power2.out",
+                    scrollTrigger: { 
+                        trigger: "#heroSubtitleContainer", 
+                        start: "top 90%" 
+                    }
+                }
+            );
+            
+            // Asset Stagger (Moved to animateAssets)
+        }
+
+        function animateAssets() {
+            // Refresh ScrollTrigger to account for new DOM elements
+            ScrollTrigger.refresh();
+            
+            // Use Batch for robust grid animation
+            ScrollTrigger.batch(".asset-card", {
+                start: "top 85%",
+                onEnter: batch => gsap.to(batch, { opacity: 1, y: 0, duration: 0.8, stagger: 0.1, ease: "power2.out", overwrite: true }),
+                onEnterBack: batch => gsap.to(batch, { opacity: 1, y: 0, duration: 0.8, stagger: 0.1, ease: "power2.out", overwrite: true })
+            });
+        }
+
+        /**
+         * ==================================================================
+         * 3. FORM & LOGIC
+         * ==================================================================
+         */
+        let storedPayload = null;
+        let collectedAnswers = {};
+
+        function setupForm() {
+            const cfg = config;
+
+            document.getElementById('phone').addEventListener('input', function (e) {
+                var x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+                e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+            });
+
+            document.getElementById('whiteForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('submitBtn');
+                btn.innerText = "Processing...";
+                btn.style.background = "#333";
+
+                storedPayload = {
+                    formType: "initial_contact",
+                    fullName: document.getElementById('fullName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    propertyAddress: `${cfg.property.streetAddress}, ${cfg.property.cityStateZip}`,
+                    agentEmail: cfg.realtor.email,
+                    submittedAt: new Date().toISOString(),
+                    questions: [],
+                    ...(cfg.deploymentInfo || {})
+                };
+
+                if (cfg.settings.visitorWebhookUrl) {
+                    try {
+                        await fetch(cfg.settings.visitorWebhookUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(storedPayload),
+                            mode: 'cors'
+                        });
+                    } catch(err) {}
+                }
+
+                setTimeout(() => showModalStep(0), 1000);
+            });
+        }
+
+        function showModalStep(index) {
+            const cfg = config;
+            const modal = document.getElementById('modalOverlay');
+            const inner = document.getElementById('modalInner');
+            modal.classList.add('active');
+            inner.innerHTML = '';
+
+            if (index < cfg.modalQuestions.length) {
+                const q = cfg.modalQuestions[index];
+                let html = `
+                    <span class="label">Question ${index + 1}</span>
+                    <h3 style="font-size: 2.5rem; margin-bottom: 2rem;">${q.questionText}</h3>
+                `;
+                q.options.forEach(opt => {
+                    const txt = opt.text || opt;
+                    const val = opt.value || opt;
+                    html += `<div class="choice-btn hover-target" onclick="handleAnswer('${q.id}', '${val}', ${index})">${txt}</div>`;
+                });
+                inner.innerHTML = html;
+            } else {
+                finishSequence();
+            }
+        }
+
+        window.handleAnswer = (qid, val, idx) => {
+            collectedAnswers[qid] = val;
+            showModalStep(idx + 1);
+        };
+
+        function finishSequence() {
+            const cfg = config;
+            
+            // Process Answers into Array
+            const questions = cfg.modalQuestions || [];
+            const modalQuestionResponses = [];
+            
+            for (const [qId, answerVal] of Object.entries(collectedAnswers)) {
+                const qObj = questions.find(q => q.id === qId);
+                if (qObj) {
+                    const optObj = qObj.options.find(o => o.value === answerVal);
+                    modalQuestionResponses.push({
+                        question: qObj.questionText,
+                        answer: optObj ? optObj.text : answerVal
+                    });
+                }
+            }
+            
+            const finalPayload = {
+                ...storedPayload,
+                formType: "modal_answers",
+                submittedAt: new Date().toISOString(),
+                questions: modalQuestionResponses
+            };
+
+            if (cfg.settings.visitorWebhookUrl) {
+                fetch(cfg.settings.visitorWebhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(finalPayload),
+                    mode: 'cors'
+                });
+            }
+
+            const inner = document.getElementById('modalInner');
+            inner.innerHTML = `
+                <h2 style="font-size: 3rem; margin-bottom: 1rem;">Access Granted.</h2>
+                <p style="color: #888; margin-bottom: 2rem;">The portfolio has been sent to your device.</p>
+                <button onclick="location.reload()" class="btn-lux hover-target" style="margin-top:0;">Return</button>
+            `;
+            
+            // Silver Confetti
+            confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 }, colors: ['#ffffff', '#bbbbbb', '#000000'] });
+        }
+
+        // Custom Cursor
+        const cursor = document.querySelector('.cursor');
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 });
+        });
+        document.addEventListener('mouseover', (e) => {
+            if (e.target.classList.contains('hover-target') || e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') {
+                cursor.classList.add('hover');
+            } else {
+                cursor.classList.remove('hover');
+            }
+        });
+
+    </script>
+</body>
+</html>

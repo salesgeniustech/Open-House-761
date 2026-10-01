@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open House</title> <!-- Set by JS -->
+
+    <!-- ★★★ START: SOCIAL SHARE META TAGS - EDIT MANUALLY FOR EACH PAGE ★★★ -->
+    <meta property="og:title" content="Open House" />
+    <meta property="og:description" content="Welcome to the Open House" />
+    <meta property="og:image" content="https://www.gta-homes.com/wp-content/uploads/what-is-an-open-house-01.jpg" /> <!-- Match Config -->
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Open House" />
+    <meta name="twitter:description" content="Welcome to the Open House" />
+    <meta name="twitter:image" content="https://www.gta-homes.com/wp-content/uploads/what-is-an-open-house-01.jpg" /> <!-- Match Config -->
+    <!-- ★★★ END: SOCIAL SHARE META TAGS ★★★ -->
+
+    <!-- FONTS: Technical & Structural -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@200;400;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- LIBRARIES -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+    <script src="https://unpkg.com/split-type"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- LOAD CONFIG -->
+    <script src="config.js"></script>
+
+    <style>
+        /* 
+         * SYSTEM VARS: THE "BLUEPRINT" LOOK
+         */
+        :root {
+            --bg: #0b0f14; /* Deep Slate */
+            --surface: #121821;
+            --grid: rgba(255,255,255,0.03);
+            --line: rgba(255,255,255,0.1);
+            --text-main: #e0e6ed;
+            --text-dim: #5c6b7f;
+            --accent: #00f0ff; /* Cyan Laser */
+            
+            --font-tech: 'JetBrains Mono', monospace;
+            --font-display: 'Syncopate', sans-serif;
+        }
+
+        * { box-sizing: border-box; cursor: none; /* We build our own cursor */ }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-tech);
+            overflow-x: hidden;
+            opacity: 0; transition: opacity 0.5s;
+        }
+
+        /* 
+         * 1. THE INTERFACE LAYER (Grid & Crosshairs)
+         */
+        .interface-grid {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(var(--grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none; z-index: -1;
+        }
+
+        /* Full Screen Crosshairs */
+        .hairline-x {
+            position: fixed; top: 50%; left: 0; width: 100%; height: 1px;
+            background: rgba(0, 240, 255, 0.3); pointer-events: none; z-index: 9000;
+        }
+        .hairline-y {
+            position: fixed; left: 50%; top: 0; height: 100%; width: 1px;
+            background: rgba(0, 240, 255, 0.3); pointer-events: none; z-index: 9000;
+        }
+        /* Coords removed as requested */
+        
+        /* Custom Mouse Target */
+        .cursor-target {
+            position: fixed; top: 0; left: 0; width: 20px; height: 20px;
+            border: 1px solid var(--accent); transform: translate(-50%, -50%) rotate(45deg);
+            pointer-events: none; z-index: 9002; transition: width 0.2s, height 0.2s;
+        }
+        .cursor-target.hover { width: 40px; height: 40px; background: rgba(0, 240, 255, 0.1); }
+
+        /* 
+         * 2. TYPOGRAPHY & LAYOUT
+         */
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 5vw; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+        
+        h1, h2, h3 { font-family: var(--font-display); text-transform: uppercase; margin: 0; line-height: 1; letter-spacing: -1px; }
+        
+        .spec-label {
+            color: var(--accent); font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase;
+            margin-bottom: 10px; display: block; padding-left: 10px; border-left: 2px solid var(--accent);
+        }
+
+        /* 
+         * 3. SECTIONS
+         */
+        
+        /* HEADER HUD */
+        header {
+            position: fixed; top: 0; left: 0; width: 100%;
+            padding: 20px; display: flex; justify-content: space-between;
+            border-bottom: 1px solid var(--line); background: rgba(11, 15, 20, 0.8);
+            backdrop-filter: blur(10px); z-index: 100;
+        }
+        .hud-item { font-size: 0.7rem; color: var(--text-dim); }
+        .hud-val { color: var(--text-main); }
+
+        /* HERO */
+        .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding-top: 100px; }
+        .title-block { margin-bottom: 50px; position: relative; }
+        .title-block::before {
+            content: ''; position: absolute; top: -20px; left: 0; width: 100px; height: 1px; background: var(--accent);
+        }
+        .hero-title { font-size: clamp(2.5rem, 8vw, 6rem); color: #fff; }
+        .hero-sub { font-family: var(--font-tech); color: var(--text-dim); max-width: 600px; margin-top: 20px; font-size: 1rem; line-height: 1.6; }
+
+        /* BLUEPRINT IMAGE SCANNER */
+        .cad-frame {
+            position: relative; width: 100%; height: 60vh;
+            border: 1px solid var(--line); overflow: hidden;
+        }
+        .cad-img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) contrast(120%) brightness(0.8); opacity: 0.5; }
+        .scanner-bar {
+            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--accent); box-shadow: 0 0 20px var(--accent);
+            z-index: 2; animation: scan 4s infinite ease-in-out;
+        }
+        .ruler-x { position: absolute; bottom: 0; left: 0; width: 100%; height: 20px; background-image: linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 20px 100%; border-top: 1px solid var(--line); }
+        .ruler-y { position: absolute; top: 0; right: 0; height: 100%; width: 20px; background-image: linear-gradient(var(--line) 1px, transparent 1px); background-size: 100% 20px; border-left: 1px solid var(--line); }
+        @keyframes scan { 0% {top: 0;} 50% {top: 100%;} 100% {top: 0;} }
+
+        /* SPECS (Bundle) */
+        .specs-section { padding: 15vh 0; border-bottom: 1px solid var(--line); }
+        .specs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); border-top: 1px solid var(--line); }
+        .spec-card {
+            border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+            padding: 40px; transition: 0.3s; position: relative;
+        }
+        .spec-card:hover { background: var(--surface); }
+        .spec-card:hover .spec-icon { color: var(--accent); text-shadow: 0 0 10px var(--accent); }
+        
+        .spec-icon { font-size: 2rem; margin-bottom: 20px; color: var(--line); transition: 0.3s; }
+        .spec-title { font-size: 1.2rem; margin-bottom: 10px; }
+        .spec-code { position: absolute; top: 10px; right: 10px; font-size: 0.6rem; color: var(--text-dim); }
+
+        /* AGENT PROFILE */
+        .profile-section { padding: 15vh 0; }
+        .blueprint-wrap { position: relative; padding: 10px; border: 1px dashed var(--text-dim); }
+        .corner-mark {
+            position: absolute; width: 20px; height: 20px; border: 2px solid var(--accent);
+        }
+        .tl { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+        .br { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+        
+        .agent-img { width: 100%; display: block; filter: grayscale(100%); opacity: 0.8; }
+        .data-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--line); padding: 15px 0; font-size: 0.9rem; }
+        .data-label { color: var(--text-dim); }
+        .data-val a { color: var(--text-main); text-decoration: none; }
+        .data-val a:hover { color: var(--accent); }
+
+        /* Social Links */
+        .social-links { margin-top: 20px; display: flex; gap: 15px; }
+        .social-icon { color: var(--text-dim); font-size: 1.5rem; text-decoration: none; transition: 0.3s; }
+        .social-icon:hover { color: var(--accent); transform: translateY(-2px); }
+
+        /* INPUT TERMINAL */
+        .terminal-section { padding: 15vh 0; max-width: 100%; margin: 0 auto; }
+        .cmd-line {
+            display: flex; border-bottom: 1px solid var(--text-dim);
+            margin-bottom: 30px; align-items: center;
+        }
+        .cmd-prompt { color: var(--accent); margin-right: 15px; }
+        .cmd-input {
+            width: 100%; background: transparent; border: none;
+            color: var(--text-main); font-family: var(--font-tech); font-size: 1.5rem;
+            padding: 15px 0; outline: none;
+        }
+        .cmd-input::placeholder { color: #333; text-transform: uppercase; }
+        
+        .btn-exec {
+            width: 100%; background: var(--accent); color: #000;
+            padding: 20px; font-family: var(--font-tech); font-weight: 700; text-transform: uppercase;
+            border: none; letter-spacing: 2px; margin-top: 30px;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            cursor: none; transition: 0.3s;
+        }
+        .btn-exec:hover { background: #fff; box-shadow: 0 0 20px #fff; }
+
+        /* MODAL */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(11, 15, 20, 0.95); z-index: 5000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: 0.3s;
+        }
+        .overlay.active { opacity: 1; pointer-events: all; }
+        .modal-box { border: 1px solid var(--accent); padding: 40px; background: #000; max-width: 600px; width: 90%; position: relative; }
+        .modal-box::before {
+            content: 'SYS_MSG'; position: absolute; top: -10px; left: 20px; background: #000; color: var(--accent); padding: 0 5px; font-size: 0.7rem;
+        }
+        
+        .opt-btn {
+            display: block; width: 100%; text-align: left;
+            background: transparent; border: 1px solid var(--line); color: var(--text-main);
+            padding: 15px; margin-bottom: 10px; font-family: var(--font-tech);
+            transition: 0.3s; cursor: none;
+        }
+        .opt-btn:hover { border-color: var(--accent); background: rgba(0, 240, 255, 0.1); }
+
+        /* SPLIT LAYOUT */
+        .split-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5vw;
+            align-items: center;
+        }
+
+        /* Footer Elements */
+        .broker-logo { max-width: 150px; margin-bottom: 20px; opacity: 0.8; filter: grayscale(100%); transition: 0.3s; display: block; margin-left: auto; margin-right: auto; }
+        .broker-logo:hover { filter: grayscale(0%); opacity: 1; }
+        .privacy-link { display: inline-block; margin-top: 15px; color: var(--text-dim); text-decoration: none; border-bottom: 1px solid transparent; transition: 0.3s; }
+        .privacy-link:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+        @media(max-width: 900px) {
+            .split-grid { grid-template-columns: 1fr; gap: 50px; }
+            .profile-section { grid-template-columns: 1fr; }
+        }
+
+        @media(max-width: 768px) {
+            /* Hide Nav Bar on Mobile */
+            header { display: none; }
+
+            /* Mobile Hero Layout (Photo BELOW Text - Default behavior) */
+            /* Removed flex-direction: column-reverse */
+            .hero .container {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            /* Adjust margin since we are not reversing anymore */
+            .title-block {
+                margin-top: 0;
+                margin-bottom: 50px; /* Restored to default */
+            }
+            
+            /* Adjust top padding since header is gone and we want space */
+            .hero { padding-top: 40px; }
+
+            .hero-title { font-size: 3rem; }
+            .profile-section { grid-template-columns: 1fr; }
+            .hairline-x, .hairline-y { display: none; } /* Hide crosshairs on touch */
+            .cad-frame { height: 40vh; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- INTERFACE LAYERS -->
+    <div class="interface-grid"></div>
+    <div class="hairline-x"></div>
+    <div class="hairline-y"></div>
+    <div class="cursor-target"></div>
+    <!-- Coords Removed -->
+    <canvas id="confetti-canvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:6000;"></canvas>
+
+    <!-- HUD -->
+    <header>
+        <div>
+            <span class="hud-item">AGENT:</span> <span class="hud-val" id="hudRealtor"></span>
+        </div>
+        <div>
+            <span class="hud-item">LOC:</span> <span class="hud-val" id="hudAddress" style="color:var(--accent);"></span>
+        </div>
+    </header>
+
+    <main>
+        
+        <!-- HERO -->
+        <section class="hero">
+            <div class="container">
+                <div class="title-block">
+                    <div class="spec-label">The Property</div>
+                    <h1 class="hero-title" id="propTitle"></h1>
+                    <p class="hero-sub" id="heroSubtitle"></p>
+                </div>
+
+                <div class="cad-frame hover-target">
+                    <div class="scanner-bar"></div>
+                    <div class="ruler-x"></div>
+                    <div class="ruler-y"></div>
+                    <img src="" id="heroImg" class="cad-img">
+                </div>
+            </div>
+        </section>
+
+        <!-- SPECS (Bundle) -->
+        <section class="specs-section">
+            <div class="container">
+                <div class="spec-label">Package Includes</div>
+                <h2 style="font-size: 2rem; margin-bottom: 40px;">FULL HOME PACKAGE</h2>
+                
+                <div class="specs-grid" id="specsGrid">
+                    <!-- JS Generated -->
+                </div>
+            </div>
+        </section>
+
+        <!-- AGENT & TERMINAL SPLIT -->
+        <section class="profile-section" id="registry">
+            <div class="container">
+                <div class="split-grid">
+                    
+                    <!-- LEFT: AGENT PROFILE -->
+                    <div>
+                        <div class="blueprint-wrap hover-target" style="margin-bottom: 30px;">
+                            <div class="corner-mark tl"></div>
+                            <div class="corner-mark br"></div>
+                            <img src="" id="realtorPhoto" class="agent-img">
+                        </div>
+                        
+                        <div>
+                            <h2 id="realtorName" style="margin-bottom: 5px;"></h2>
+                            <div id="realtorTitle" style="color:var(--accent); font-family:var(--font-tech); font-size:0.9rem; margin-bottom: 20px; text-transform:uppercase; letter-spacing:1px;"></div>
+                            <p id="realtorBio" style="color:var(--text-dim); margin-bottom: 30px; line-height:1.6;"></p>
+                            
+                            <div class="data-row">
+                                <span class="data-label">CALL ME</span>
+                                <span class="data-val"><a href="#" id="linkPhone"></a></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">EMAIL ME</span>
+                                <span class="data-val"><a href="#" id="linkEmail"></a></span>
+                            </div>
+                            <!-- Affiliation Removed -->
+                            
+                            <div id="socialLinks" class="social-links"></div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: INPUT TERMINAL -->
+                    <div>
+                        <div style="margin-bottom: 30px;">
+                            <h2 style="font-size: 2rem;">RECEIVE FULL PACKAGE</h2>
+                            <p style="color: var(--text-dim); font-family: var(--font-tech);">// ENTER DETAILS TO RECEIVE FULL HOME PACKAGE</p>
+                        </div>
+
+                        <form id="cadForm">
+                            <div class="cmd-line">
+                                <span class="cmd-prompt">> ID.NAME_</span>
+                                <input type="text" id="fullName" class="cmd-input hover-target" placeholder="FULL NAME" required>
+                            </div>
+                            <div class="cmd-line">
+                                <span class="cmd-prompt">> ID.EMAIL_</span>
+                                <input type="email" id="email" class="cmd-input hover-target" placeholder="EMAIL ADDRESS" required>
+                            </div>
+                            <div class="cmd-line">
+                                <span class="cmd-prompt">> ID.PHONE_</span>
+                                <input type="tel" id="phone" class="cmd-input hover-target" placeholder="NUMBER" required inputmode="numeric">
+                            </div>
+
+                            <div style="font-size: 0.7rem; color: var(--text-dim); margin-bottom: 20px; display: flex; align-items: flex-start; gap: 10px;">
+                                <input type="checkbox" id="consent" required style="accent-color: var(--accent); margin-top: 3px;">
+                                <span id="consentLabel"></span>
+                            </div>
+
+                            <button type="submit" class="btn-exec hover-target" id="submitBtn">GET PACKAGE</button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <footer style="padding: 50px; text-align:center; color: var(--text-dim); font-size: 0.7rem; border-top: 1px solid var(--line);">
+            <img id="brokerLogo" src="" alt="Brokerage Logo" class="broker-logo" style="display:none;">
+            <div id="footerAddress"></div>
+            <div style="margin-top: 10px;">SYSTEM STATUS: ONLINE | © <span id="year"></span></div>
+            <a id="privacyLink" href="#" target="_blank" class="privacy-link">Privacy Policy</a>
+        </footer>
+
+    </main>
+
+    <!-- MODAL -->
+    <div class="overlay" id="modalOverlay">
+        <div class="modal-box">
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * ==================================================================
+         * 1. SAFETY CONFIG
+         * ==================================================================
+         */
+        if (typeof window.config === 'undefined') {
+            window.config = {
+                meta: { titlePrefix: "Project", privacyPolicyLink: "#" },
+                property: { streetAddress: "1400 Pacific Heights", heroSubtitle: "Structural integrity 100%. Modern design parameters exceeded.", backgroundImageUrl: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2671" },
+                realtor: { fullName: "Alex Sterling", title: "Architect", bio: "Architectural specialist.", phone: "555-0199", email: "alex@design.com", photoUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=800", social: {} },
+                brokerage: { name: "Structure Real Estate", address: "SF, CA", logoUrl: "" },
+                openHouse: { bundleItems: [{ icon: "fa-layer-group", text: "Blueprints" }, { icon: "fa-cube", text: "3D Models" }] },
+                settings: { visitorWebhookUrl: "", confettiColors: ['#00f0ff', '#ffffff'] },
+                modalQuestions: [{ id: "q1", questionText: "Client Status?", options: [{ text: "Acquiring", value: "buy" }] }]
+            };
+        }
+
+        /**
+         * ==================================================================
+         * 2. INIT
+         * ==================================================================
+         */
+        document.addEventListener("DOMContentLoaded", () => {
+            applyThemeColors();
+            populateData();
+            initAnimations();
+            setupForm();
+            initCursor();
+            
+            document.body.style.opacity = 1;
+        });
+
+        function applyThemeColors() {
+            if (window.config && window.config.settings) {
+                const root = document.documentElement;
+                if (window.config.settings.primaryColor) root.style.setProperty('--text-main', window.config.settings.primaryColor);
+                if (window.config.settings.secondaryColor) root.style.setProperty('--accent', window.config.settings.secondaryColor);
+                if (window.config.settings.accentColor) root.style.setProperty('--line', window.config.settings.accentColor);
+                if (window.config.settings.neutralColor) root.style.setProperty('--bg', window.config.settings.neutralColor);
+            }
+        }
+
+        function populateData() {
+            const cfg = window.config;
+
+            // Meta & HUD
+            document.title = cfg.meta.pageTitlePrefix || `PROJECT: ${cfg.meta.titlePrefix}`;
+            
+            // Nav Bar: Realtor Name & Property Address
+            document.getElementById('hudRealtor').innerText = cfg.realtor.fullName ? cfg.realtor.fullName.toUpperCase() : "AGENT";
+            document.getElementById('hudAddress').innerText = cfg.property.streetAddress.toUpperCase();
+
+            // Hero
+            document.getElementById('propTitle').innerText = cfg.property.streetAddress.toUpperCase();
+            document.getElementById('heroSubtitle').innerText = cfg.property.heroSubtitle;
+            document.getElementById('heroImg').src = cfg.property.backgroundImageUrl;
+
+            // Specs Grid
+            const grid = document.getElementById('specsGrid');
+            if(cfg.openHouse && cfg.openHouse.bundleItems) {
+                cfg.openHouse.bundleItems.forEach((item, i) => {
+                    // Generate a fake "tech code"
+                    const code = `SPC-${Math.floor(Math.random()*900)+100}`;
+                    // Handle FontAwesome class - if it lacks "fa-" prefix in config, you might need to adjust, but assuming config has full classes like "fas fa-home" or just "fa-home"
+                    // The template used "fas ${item.icon}". If config has "fas fa-home", it becomes "fas fas fa-home".
+                    // Let's clean it up.
+                    let iconClass = item.icon;
+                    if(!iconClass.includes('fa-')) iconClass = `fa-${iconClass}`; // fallback
+                    // If config has "fas fa-home", using "fas ${iconClass}" is redundant but usually works. 
+                    // Better: just use class="${item.icon}" if it contains the full set, or append if not.
+                    // Standardizing:
+                    
+                    grid.innerHTML += `
+                        <div class="spec-card hover-target">
+                            <div class="spec-code">${code}</div>
+                            <i class="${iconClass} spec-icon"></i>
+                            <div class="spec-title">${item.text}</div>
+                            <div style="font-size:0.8rem; color:var(--text-dim);">AVAILABLE</div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Agent
+            const r = cfg.realtor;
+            document.getElementById('realtorName').innerText = r.fullName;
+            
+            // Realtor Title
+            const rTitle = document.getElementById('realtorTitle');
+            if(r.title) {
+                rTitle.innerText = r.title;
+            } else {
+                rTitle.style.display = 'none';
+            }
+
+            document.getElementById('realtorBio').innerText = r.bio;
+            document.getElementById('realtorPhoto').src = r.photoUrl;
+            document.getElementById('linkPhone').innerText = r.phone;
+            document.getElementById('linkPhone').href = `tel:${r.phone}`;
+            document.getElementById('linkEmail').innerText = r.email;
+            document.getElementById('linkEmail').href = `mailto:${r.email}`;
+            
+            // Social Links
+            const socialContainer = document.getElementById('socialLinks');
+            socialContainer.innerHTML = '';
+            if(r.social) {
+                // Map keys to FontAwesome
+                const iconMap = {
+                    facebook: 'fa-brands fa-facebook',
+                    instagram: 'fa-brands fa-instagram',
+                    linkedin: 'fa-brands fa-linkedin',
+                    twitter: 'fa-brands fa-twitter',
+                    youtube: 'fa-brands fa-youtube',
+                    tiktok: 'fa-brands fa-tiktok',
+                    website: 'fas fa-globe'
+                };
+
+                for(const [key, url] of Object.entries(r.social)) {
+                    if(!url) continue;
+                    // Normalize key
+                    const k = key.toLowerCase();
+                    const iconClass = iconMap[k] || 'fas fa-link';
+                    
+                    socialContainer.innerHTML += `
+                        <a href="${url}" target="_blank" class="social-icon hover-target">
+                            <i class="${iconClass}"></i>
+                        </a>
+                    `;
+                }
+            }
+
+            // Footer Address & Year
+            document.getElementById('footerAddress').innerText = cfg.brokerage.address.toUpperCase();
+            document.getElementById('year').innerText = new Date().getFullYear();
+
+            // Brokerage Logo
+            const bLogo = document.getElementById('brokerLogo');
+            if(cfg.brokerage.logoUrl) {
+                bLogo.src = cfg.brokerage.logoUrl;
+                bLogo.style.display = 'block';
+            }
+
+            // Privacy Policy Link
+            const ppLink = document.getElementById('privacyLink');
+            if(cfg.meta.privacyPolicyLink) {
+                ppLink.href = cfg.meta.privacyPolicyLink;
+            } else {
+                ppLink.style.display = 'none';
+            }
+
+            // Consent Text
+            const consentLabel = document.getElementById('consentLabel');
+            const ppUrl = cfg.meta.privacyPolicyLink || "#";
+            const brokerageName = cfg.brokerage.name || "the brokerage";
+            
+            consentLabel.innerHTML = `I agree to be contacted by ${brokerageName} via call, email, and text. To opt-out, you can reply ‘stop’ at any time or click the unsubscribe link in the emails. Message and data rates may apply. <a href="${ppUrl}" target="_blank" style="color:var(--accent); text-decoration:none;">Privacy Policy</a>`;
+        }
+
+        function initAnimations() {
+            const lenis = new Lenis();
+            function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+            requestAnimationFrame(raf);
+
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Split Text Reveal
+            const split = new SplitType('#propTitle', { types: 'chars' });
+            gsap.from(split.chars, {
+                opacity: 0, y: 50, stagger: 0.05, duration: 1, ease: "power4.out", delay: 0.2
+            });
+
+            // Image Scan Effect
+            gsap.from(".cad-frame", {
+                scaleY: 0, transformOrigin: "top", duration: 1.5, ease: "power2.inOut", delay: 0.5
+            });
+        }
+
+        // --- FORM LOGIC ---
+        let storedPayload = null;
+        let collectedAnswers = {};
+
+        function setupForm() {
+            const cfg = window.config;
+
+            document.getElementById('phone').addEventListener('input', function (e) {
+                var x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+                e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+            });
+
+            document.getElementById('cadForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('submitBtn');
+                btn.innerText = "SENDING...";
+                btn.style.background = "#fff";
+
+                storedPayload = {
+                    formType: "initial_contact",
+                    fullName: document.getElementById('fullName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    propertyAddress: `${cfg.property.streetAddress}, ${cfg.property.cityStateZip}`,
+                    agentEmail: cfg.realtor.email,
+                    submittedAt: new Date().toISOString(),
+                    questions: [],
+                    ...(cfg.deploymentInfo || {})
+                };
+
+                if(cfg.settings.visitorWebhookUrl) {
+                    try {
+                        await fetch(cfg.settings.visitorWebhookUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(storedPayload),
+                            mode: 'cors'
+                        });
+                    } catch(err) {}
+                }
+
+                setTimeout(() => showModalStep(0), 1000);
+            });
+        }
+
+        function showModalStep(index) {
+            const cfg = window.config;
+            const modal = document.getElementById('modalOverlay');
+            const content = document.getElementById('modalContent');
+            modal.classList.add('active');
+            content.innerHTML = '';
+
+            if(index < cfg.modalQuestions.length) {
+                const q = cfg.modalQuestions[index];
+                let html = `
+                    <div class="spec-label">DATA QUERY ${index+1}</div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 30px; color: #fff;">${q.questionText}</h3>
+                `;
+                q.options.forEach(opt => {
+                    const txt = opt.text || opt;
+                    const val = opt.value || opt;
+                    html += `<button class="opt-btn hover-target" onclick="handleAnswer('${q.id}', '${val}', ${index})">[ ${txt} ]</button>`;
+                });
+                content.innerHTML = html;
+            } else {
+                finishSequence();
+            }
+        }
+
+        window.handleAnswer = (qid, val, idx) => {
+            collectedAnswers[qid] = val;
+            showModalStep(idx + 1);
+        };
+
+        function finishSequence() {
+            const cfg = window.config;
+            
+            // Process Answers into Array
+            const questions = cfg.modalQuestions || [];
+            const modalQuestionResponses = [];
+            
+            for (const [qId, answerVal] of Object.entries(collectedAnswers)) {
+                const qObj = questions.find(q => q.id === qId);
+                if (qObj) {
+                    const optObj = qObj.options.find(o => o.value === answerVal);
+                    modalQuestionResponses.push({
+                        question: qObj.questionText,
+                        answer: optObj ? optObj.text : answerVal
+                    });
+                }
+            }
+            
+            const finalPayload = {
+                ...storedPayload,
+                formType: "modal_answers",
+                submittedAt: new Date().toISOString(),
+                questions: modalQuestionResponses
+            };
+
+            if(cfg.settings.visitorWebhookUrl) {
+                fetch(cfg.settings.visitorWebhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(finalPayload),
+                    mode: 'cors'
+                });
+            }
+
+            document.getElementById('modalContent').innerHTML = `
+                <h1 style="color:var(--accent); font-size:3rem; margin-bottom:20px;">PACKAGE UNLOCKED</h1>
+                <p style="color:var(--text-dim); margin-bottom:30px;">THE FULL HOME PACKAGE HAS BEEN SENT TO YOUR INBOX.</p>
+                <button onclick="location.reload()" class="btn-exec hover-target" style="clip-path:none;">REBOOT</button>
+            `;
+
+            // Cyan Confetti
+            const c = cfg.settings.confettiColors || ['#00f0ff'];
+            confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: c });
+        }
+
+        // --- CURSOR & COORDINATES ---
+        function initCursor() {
+            const target = document.querySelector('.cursor-target');
+            const hairlineX = document.querySelector('.hairline-x');
+            const hairlineY = document.querySelector('.hairline-y');
+            // Coords element removed, so no update needed.
+
+            document.addEventListener('mousemove', (e) => {
+                const x = e.clientX;
+                const y = e.clientY;
+                
+                // Move Crosshairs
+                gsap.set(target, { x: x, y: y });
+                gsap.set(hairlineX, { top: y });
+                gsap.set(hairlineY, { left: x });
+                
+                // Removed coords.innerText update
+            });
+
+            // Hover Effects
+            document.addEventListener('mouseover', (e) => {
+                if(e.target.classList.contains('hover-target') || e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'A') {
+                    target.classList.add('hover');
+                } else {
+                    target.classList.remove('hover');
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>

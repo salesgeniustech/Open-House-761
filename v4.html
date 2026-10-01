@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open House</title> <!-- Set by JS -->
+
+    <!-- ★★★ START: SOCIAL SHARE META TAGS - EDIT MANUALLY FOR EACH PAGE ★★★ -->
+    <meta property="og:title" content="Open House" />
+    <meta property="og:description" content="Welcome to the Open House" />
+    <meta property="og:image" content="https://www.gta-homes.com/wp-content/uploads/what-is-an-open-house-01.jpg" /> <!-- Match Config -->
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Open House" />
+    <meta name="twitter:description" content="Welcome to the Open House" />
+    <meta name="twitter:image" content="https://www.gta-homes.com/wp-content/uploads/what-is-an-open-house-01.jpg" /> <!-- Match Config -->
+    <!-- ★★★ END: SOCIAL SHARE META TAGS ★★★ -->
+
+    <!-- FONTS: High Fashion & Editorial -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Italiana&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- LIBRARIES -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <!-- Lenis for Luxury Smooth Scroll -->
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+    <script src="https://unpkg.com/split-type"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- CONFIG -->
+    <script src="config.js"></script>
+
+    <style>
+        /* 
+         * ----------------------------------------------------------
+         * 1. PALETTE: BLUSH, SILK & CHAMPAGNE
+         * ----------------------------------------------------------
+         */
+        :root {
+            --bg-warm: #fdfcfb;
+            --bg-rose: #fbf5f3;
+            --text-charcoal: #2c2c2c;
+            --text-muted: #6f6f6f;
+            
+            --gold: #c5a059;
+            --blush: #e8dcd8;
+            --silk: rgba(255, 255, 255, 0.8);
+            
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-shadow: 0 20px 60px rgba(212, 175, 155, 0.15);
+            
+            --font-disp: 'Italiana', serif;
+            --font-sub: 'Cinzel', serif;
+            --font-body: 'Montserrat', sans-serif;
+        }
+
+        * { box-sizing: border-box; cursor: none; }
+
+        body {
+            margin: 0; padding: 0;
+            background: var(--bg-warm);
+            color: var(--text-charcoal);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 
+         * ----------------------------------------------------------
+         * 2. ATMOSPHERE (Texture & Cursor)
+         * ----------------------------------------------------------
+         */
+        .texture-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            opacity: 0.03; pointer-events: none; z-index: 9000;
+        }
+
+        .cursor-dot {
+            position: fixed; top: 0; left: 0; width: 10px; height: 10px;
+            background: var(--gold); border-radius: 50%; pointer-events: none; z-index: 9999;
+            transform: translate(-50%, -50%); transition: width 0.3s, height 0.3s, background 0.3s;
+        }
+        .cursor-dot.hovered {
+            width: 60px; height: 60px; background: rgba(197, 160, 89, 0.15);
+            border: 1px solid var(--gold);
+        }
+
+        /* 
+         * ----------------------------------------------------------
+         * 3. LAYOUT & TYPOGRAPHY
+         * ----------------------------------------------------------
+         */
+        section { position: relative; width: 100%; padding: 10vh 5vw; }
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        h1, h2, h3 { font-family: var(--font-disp); font-weight: 400; line-height: 1; margin: 0; }
+        .eyebrow {
+            font-family: var(--font-sub); font-size: 0.75rem; letter-spacing: 0.25em;
+            text-transform: uppercase; color: var(--gold); margin-bottom: 1.5rem; display: block;
+        }
+
+        /* PRELOADER */
+        .curtain {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-rose); z-index: 10000;
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column;
+        }
+        .curtain-logo { font-family: var(--font-disp); font-size: clamp(1.5rem, 5vw, 3rem); overflow: hidden; text-align: center; padding: 0 1rem; }
+
+        /* HERO */
+        .hero { min-height: 100vh; display: flex; align-items: center; padding-top: 0; }
+        .hero-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 4rem; align-items: center; width: 100%; }
+        
+        .hero-text-wrap { z-index: 2; }
+        .hero-title { font-size: clamp(3.5rem, 7vw, 7rem); color: var(--text-charcoal); margin-bottom: 1rem; }
+        .hero-subtitle { font-size: 1.2rem; color: var(--text-muted); line-height: 1.6; max-width: 500px; margin-bottom: 3rem; }
+
+        .hero-image-arch {
+            width: 100%; height: 75vh;
+            border-radius: 200px 200px 0 0; /* The "Arch" Look */
+            overflow: hidden; position: relative;
+            box-shadow: 20px 20px 60px rgba(0,0,0,0.05);
+        }
+        .hero-img { width: 100%; height: 120%; object-fit: cover; }
+
+        /* THE PACKAGE (Value Prop) */
+        .package-section { background: var(--bg-rose); text-align: center; overflow: hidden; }
+        .card-stack {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            margin: 4rem auto 4rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            justify-content: center;
+        }
+        .info-card {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            background: rgba(255,255,255,0.6); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.8);
+            border-radius: 2px; padding: 2rem;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            box-shadow: 0 10px 30px rgba(197, 160, 89, 0.1);
+            transition: transform 0.5s;
+        }
+        .info-card i { font-size: 2rem; color: var(--blush); margin-bottom: 1rem; }
+        .info-card h4 { font-family: var(--font-sub); font-size: 1.2rem; margin-bottom: 0.5rem; }
+
+        /* HOSTESS */
+        .host-grid { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 4rem; align-items: center; }
+        .host-photo-frame {
+            position: relative; padding: 20px; border: 1px solid var(--gold);
+        }
+        .host-img { width: 100%; display: block; filter: sepia(10%); }
+        .signature { font-family: 'Italiana', cursive; font-size: 2rem; color: var(--gold); margin-top: 2rem; }
+        
+        .contact-row { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 2rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+        .contact-row a { color: var(--text-muted); text-decoration: none; border-bottom: 1px solid transparent; transition: 0.3s; }
+        .contact-row a:hover { color: var(--gold); border-bottom-color: var(--gold); }
+        
+        /* SOCIAL ICONS */
+        #socialLinks { display: flex; gap: 1.5rem; margin-top: 1.5rem; justify-content: flex-start; }
+        #socialLinks a { 
+            font-size: 1.8rem; color: #dcdcdc; transition: 0.3s; display: inline-block; 
+        }
+        #socialLinks a:hover { color: var(--gold); transform: translateY(-3px); }
+        
+        @media(max-width: 768px) {
+            #socialLinks { justify-content: center; }
+        }
+
+        /* FORM (The Guest List) */
+        .registry-section { padding-bottom: 15vh; }
+        .form-container {
+            max-width: 700px; margin: 0 auto;
+            background: #fff; padding: 4rem;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.05);
+            border: 1px solid #f0f0f0;
+            text-align: center;
+            position: relative;
+        }
+        /* Decorative elements */
+        .form-container::before {
+            content: ''; position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 1px solid var(--blush); pointer-events: none;
+        }
+
+        .input-elegant {
+            width: 100%; border: none; border-bottom: 1px solid #ddd;
+            padding: 1.5rem 0; font-family: var(--font-disp); font-size: 1.5rem;
+            background: transparent; text-align: center; color: var(--text-charcoal);
+            margin-bottom: 1rem; transition: 0.3s;
+        }
+        .input-elegant:focus { outline: none; border-bottom-color: var(--gold); }
+        .input-elegant::placeholder { color: #ccc; font-size: 1.2rem; font-family: var(--font-body); }
+
+        /* BUTTON */
+        .btn-chic {
+            margin-top: 2rem;
+            padding: 1.2rem 3rem;
+            background: var(--gold); color: #fff;
+            font-family: var(--font-sub); text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem;
+            border: none; cursor: pointer; transition: 0.4s;
+            position: relative; overflow: hidden; z-index: 1;
+        }
+        .btn-chic::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 0; height: 100%;
+            background: #fff; z-index: -1; transition: 0.4s;
+        }
+        .btn-chic:hover { color: var(--gold); }
+        .btn-chic:hover::after { width: 100%; }
+
+        .consent-text { font-size: 0.75rem; color: #999; margin-top: 1.5rem; line-height: 1.6; }
+        .consent-text a { color: var(--gold); text-decoration: none; }
+
+        /* MODAL */
+        .concierge-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(253, 252, 251, 0.98); z-index: 5000;
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            opacity: 0; pointer-events: none; transition: 0.5s;
+        }
+        .concierge-modal.active { opacity: 1; pointer-events: all; }
+        
+        .pill-option {
+            padding: 1rem 2rem; border: 1px solid #ddd; background: #fff;
+            margin: 0.5rem; border-radius: 50px; cursor: pointer;
+            font-family: var(--font-body); font-size: 0.9rem; color: #666;
+            transition: 0.3s; display: inline-block;
+        }
+        .pill-option:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+
+        /* FOOTER */
+        footer { text-align: center; padding: 3rem 0; border-top: 1px solid #eee; font-size: 0.8rem; color: #999; }
+
+        /* MOBILE */
+        @media(max-width: 768px) {
+            .hero-layout { grid-template-columns: 1fr; text-align: center; }
+            .hero-image-arch { height: 50vh; order: -1; margin-bottom: 2rem; }
+            .host-grid { grid-template-columns: 1fr; text-align: center; }
+            .contact-row { justify-content: center; }
+            .form-container { padding: 2rem; }
+
+            /* Compact Package Section on Mobile */
+            .card-stack { 
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                margin: 1.5rem auto 2rem;
+            }
+            .package-section { padding: 5vh 5vw; }
+            .info-card { 
+                height: auto; 
+                padding: 1.5rem; 
+                transform: none !important; /* Reset any inline rotation */
+                margin: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="texture-overlay"></div>
+    <div class="cursor-dot"></div>
+    <canvas id="confetti-canvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:6000;"></canvas>
+
+    <!-- PRELOADER -->
+    <div class="curtain">
+        <div class="curtain-logo" id="loaderText">MAISON</div>
+    </div>
+
+    <main>
+        
+        <!-- HERO -->
+        <section class="hero">
+            <div class="container hero-layout">
+                <div class="hero-text-wrap">
+                    <span class="eyebrow">Welcome to</span>
+                    <h1 class="hero-title" id="propTitle">The Residence</h1>
+                    <p class="hero-subtitle" id="heroSubtitle">Experience a home where design meets desire.</p>
+                    <button onclick="document.getElementById('registry').scrollIntoView({behavior:'smooth'})" class="btn-chic hover-target">
+                        Acquire Info Package
+                    </button>
+                </div>
+                <div class="hero-image-arch">
+                    <img src="" id="heroImg" class="hero-img" data-speed="0.8">
+                </div>
+            </div>
+        </section>
+
+        <!-- THE "PACKAGE" (Value Prop) -->
+        <section class="package-section">
+            <div class="container">
+                <span class="eyebrow">The Collection</span>
+                <h2 style="font-size: 3rem; margin-bottom: 1rem;">Your Digital Portfolio</h2>
+                <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">
+                    We have curated a comprehensive guide to this property and its surroundings. 
+                    Register below to instantly unlock these assets.
+                </p>
+
+                <div class="card-stack" id="bundleStack">
+                    <!-- Cards injected via JS -->
+                    <div class="info-card" style="z-index:3; transform: rotate(-2deg);">
+                        <i class="fas fa-map"></i>
+                        <h4>Neighbourhood Guide</h4>
+                        <p style="font-size:0.8rem; color:#888;">Schools, Dining & Lifestyle</p>
+                    </div>
+                    <div class="info-card" style="z-index:2; transform: rotate(2deg) translateY(-10px);">
+                        <i class="fas fa-ruler-combined"></i>
+                        <h4>Floor Plans</h4>
+                        <p style="font-size:0.8rem; color:#888;">Detailed Architectural Layouts</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- THE HOST -->
+        <section class="host-section">
+            <div class="container host-grid">
+                <div class="host-photo-frame">
+                    <img src="" id="realtorPhoto" class="host-img">
+                </div>
+                <div>
+                    <span class="eyebrow">Your Hostess</span>
+                    <h2 style="font-size: 3rem; margin-bottom: 0.5rem;" id="realtorName"></h2>
+                    <div id="realtorTitle" style="font-family: var(--font-sub); font-size: 0.9rem; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; letter-spacing: 2px;"></div>
+                    <p style="line-height: 1.8; color: var(--text-muted);" id="realtorBio"></p>
+                    
+                    <div class="signature" id="realtorSign"></div>
+                    
+                    <div class="contact-row" id="realtorContactInfo">
+                        <!-- Injected -->
+                    </div>
+                    <div id="socialLinks"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- THE FORM -->
+        <section class="registry-section" id="registry">
+            <div class="form-container">
+                <span class="eyebrow">Guest Registry</span>
+                <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">Unlock The Package</h2>
+                <p style="color: var(--text-muted); margin-bottom: 3rem;">
+                    Kindly sign the guest book to receive the <br><strong>Home & Neighbourhood Info Package</strong> via email.
+                </p>
+
+                <form id="chicForm">
+                    <input type="text" id="fullName" class="input-elegant hover-target" placeholder="Your Name" required autocomplete="name">
+                    <input type="email" id="email" class="input-elegant hover-target" placeholder="Email Address" required autocomplete="email">
+                    <input type="tel" id="phone" class="input-elegant hover-target" placeholder="Phone Number" required autocomplete="tel" inputmode="numeric">
+
+                    <div style="margin-top: 2rem;">
+                        <input type="checkbox" id="consentCheckbox" required style="accent-color: var(--gold);">
+                        <label for="consentCheckbox" class="consent-text" id="consentLabel">
+                            I consent to receiving this material.
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-chic hover-target" id="submitBtn">
+                        Send Me The Package
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <footer>
+            <div id="footerBrand" style="font-family:var(--font-sub); font-size:1.2rem; margin-bottom:10px; color:var(--text-charcoal);"></div>
+            <div id="footerAddress"></div>
+            <div id="footerPrivacy" style="margin-top:10px;"></div>
+            <div style="margin-top:20px; opacity:0.5;">© <span id="year"></span></div>
+            <img src="" id="footerLogo" style="height:40px; margin-top:20px; display:none; opacity:0.5;">
+        </footer>
+
+    </main>
+
+    <!-- MODAL -->
+    <div class="concierge-modal" id="modalOverlay">
+        <div class="container" style="text-align:center; max-width:600px;">
+            <div id="modalContent">
+                <!-- Questions -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * ==================================================================
+         * 1. CONFIG FALLBACK (If file missing)
+         * ==================================================================
+         */
+        if (typeof config === 'undefined') {
+            window.config = {
+                meta: { titlePrefix: "Maison", privacyPolicyLink: "#" },
+                property: { streetAddress: "1400 Pacific Heights", heroSubtitle: "A curated residence for the modern connoisseur.", backgroundImageUrl: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=1974&auto=format&fit=crop" },
+                realtor: { fullName: "Victoria Saint", bio: "Specializing in properties that inspire.", phone: "555-0123", email: "v@maison.com", photoUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=800&auto=format&fit=crop", social: { instagram: "#" } },
+                brokerage: { name: "Maison Global", address: "Beverly Hills", logoUrl: "" },
+                openHouse: { bundleItems: [{ icon: "fa-school", text: "School Ratings" }, { icon: "fa-utensils", text: "Dining Guide" }, { icon: "fa-map", text: "Floor Plans" }] },
+                settings: { visitorWebhookUrl: "", confettiColors: ['#d4af37', '#e8dcd8'] },
+                modalQuestions: [{ id: "timing", questionText: "When are you moving?", options: [{ text: "ASAP", value: "asap" }] }]
+            };
+        }
+
+        /**
+         * ==================================================================
+         * 2. DATA MAPPING & INIT
+         * ==================================================================
+         */
+        document.addEventListener("DOMContentLoaded", () => {
+            applyThemeColors();
+            populateData();
+            initAnimations();
+            setupForm();
+        });
+
+        function applyThemeColors() {
+            if (config.settings) {
+                const root = document.documentElement;
+                if (config.settings.primaryColor) root.style.setProperty('--text-charcoal', config.settings.primaryColor);
+                if (config.settings.secondaryColor) root.style.setProperty('--gold', config.settings.secondaryColor);
+                if (config.settings.accentColor) {
+                    root.style.setProperty('--blush', config.settings.accentColor);
+                }
+                if (config.settings.neutralColor) root.style.setProperty('--bg-warm', config.settings.neutralColor);
+            }
+        }
+
+        function populateData() {
+            // Page Title
+            document.title = `${config.meta.pageTitlePrefix || config.meta.titlePrefix} | Collection`;
+
+            // Hero
+            document.getElementById('propTitle').innerText = config.property.streetAddress;
+            document.getElementById('heroSubtitle').innerText = config.property.heroSubtitle;
+            document.getElementById('heroImg').src = config.property.backgroundImageUrl;
+            document.getElementById('loaderText').innerText = (config.realtor.fullName || "MAISON").toUpperCase();
+
+            // The Package (Bundle Items) - Visualized as Cards
+            const stack = document.getElementById('bundleStack');
+            stack.innerHTML = ''; // Clear defaults
+            if(config.openHouse && config.openHouse.bundleItems) {
+                // Remove manual rotation/transforms here so CSS can handle it responsively
+                // (The previous version hardcoded style="transform:..." which broke mobile layout)
+                config.openHouse.bundleItems.forEach((item, index) => {
+                    // Calculate desktop-only rotation if desired, or use nth-child in CSS
+                    // For now, we render clean elements and let CSS/GSAP handle it.
+                    stack.innerHTML += `
+                        <div class="info-card">
+                            <i class="fas ${item.icon}"></i>
+                            <h4>${item.text}</h4>
+                            <p style="font-size:0.7rem; color:#999; letter-spacing:1px; text-transform:uppercase;">Included in Package</p>
+                        </div>
+                    `;
+                });
+            }
+
+            // Host
+            const r = config.realtor;
+            document.getElementById('realtorName').innerText = r.fullName;
+            document.getElementById('realtorTitle').innerText = r.title || "";
+            document.getElementById('realtorBio').innerHTML = r.bio;
+            document.getElementById('realtorSign').innerText = r.fullName; // Pseudo signature
+            document.getElementById('realtorPhoto').src = r.photoUrl;
+            
+            document.getElementById('realtorContactInfo').innerHTML = `
+                <a href="tel:${r.phone}" style="display:block; margin-bottom:0.5rem;">${r.phone}</a>
+                <a href="mailto:${r.email}" style="display:block;">${r.email}</a>
+            `;
+
+            if(r.social) {
+                const sBox = document.getElementById('socialLinks');
+                const iconMap = {
+                    facebook: "fab fa-facebook-f",
+                    instagram: "fab fa-instagram",
+                    linkedin: "fab fa-linkedin-in",
+                    twitter: "fab fa-twitter",
+                    youtube: "fab fa-youtube",
+                    tiktok: "fab fa-tiktok",
+                    pinterest: "fab fa-pinterest",
+                    website: "fas fa-globe"
+                };
+
+                Object.entries(r.social).forEach(([network, link]) => {
+                    if(link) {
+                        const iconClass = iconMap[network.toLowerCase()] || "fas fa-share-alt";
+                        sBox.innerHTML += `<a href="${link}" target="_blank"><i class="${iconClass}"></i></a>`;
+                    }
+                });
+            }
+
+            // Footer & Form
+            const consentText = `I agree to be contacted by ${config.brokerage.name} via call, email, and text. To opt-out, you can reply ‘stop’ at any time or click the unsubscribe link in the emails. Message and data rates may apply. <a href="${config.meta.privacyPolicyLink}" target="_blank">Privacy Policy</a>`;
+            document.getElementById('consentLabel').innerHTML = consentText;
+
+            document.getElementById('footerBrand').innerText = config.brokerage.name;
+            document.getElementById('footerAddress').innerText = config.brokerage.address;
+            
+            if(config.meta.privacyPolicyLink) {
+                document.getElementById('footerPrivacy').innerHTML = `<a href="${config.meta.privacyPolicyLink}" target="_blank" style="text-decoration:none; color:inherit; border-bottom:1px solid transparent; transition:0.3s;">Privacy Policy</a>`;
+                document.getElementById('footerPrivacy').querySelector('a').addEventListener('mouseenter', function() { this.style.borderBottomColor = '#999'; });
+                document.getElementById('footerPrivacy').querySelector('a').addEventListener('mouseleave', function() { this.style.borderBottomColor = 'transparent'; });
+            }
+
+            if(config.brokerage.logoUrl) {
+                const img = document.getElementById('footerLogo');
+                img.src = config.brokerage.logoUrl;
+                img.style.display = "inline-block";
+            }
+            document.getElementById('year').innerText = new Date().getFullYear();
+        }
+
+        // --- ANIMATIONS ---
+        function initAnimations() {
+            // Curtain
+            const tl = gsap.timeline();
+            tl.to('.curtain-logo', { scale: 1.2, duration: 1, ease: "power2.out" })
+              .to('.curtain', { yPercent: -100, duration: 1.2, ease: "power4.inOut" }, "+=0.5")
+              .from('.hero-image-arch', { y: 100, opacity: 0, duration: 1.2, ease: "power3.out" }, "-=0.8")
+              .from('.hero-text-wrap', { y: 50, opacity: 0, duration: 1 }, "-=1");
+
+            // Lenis
+            const lenis = new Lenis({ duration: 1.2 });
+            function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+            requestAnimationFrame(raf);
+
+            // ScrollTriggers
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // Parallax Hero Image
+            gsap.to("#heroImg", {
+                yPercent: 20, ease: "none",
+                scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true }
+            });
+
+            // Card Stack Animation
+            if(window.innerWidth > 768) {
+                gsap.from(".info-card", {
+                    y: 100, opacity: 0, stagger: 0.2, duration: 1, ease: "back.out(1.7)",
+                    scrollTrigger: { trigger: ".package-section", start: "top 70%" }
+                });
+            } else {
+                // Simple mobile fade-in batch
+                ScrollTrigger.batch(".info-card", {
+                    start: "top 85%",
+                    onEnter: batch => gsap.to(batch, { opacity: 1, y: 0, duration: 0.5, stagger: 0.1 })
+                });
+                // Ensure initial state for mobile batch
+                gsap.set(".info-card", { opacity: 0, y: 20 });
+            }
+        }
+
+        // --- FORM & LOGIC ---
+        let storedInitialPayload = null;
+        let collectedAnswers = {};
+
+        function setupForm() {
+            // Phone Format
+            document.getElementById('phone').addEventListener('input', function (e) {
+                var x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+                e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+            });
+
+            document.getElementById('chicForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('submitBtn');
+                btn.innerHTML = "Processing...";
+
+                // 1. Initial Payload
+                storedInitialPayload = {
+                    formType: "initial_contact",
+                    fullName: document.getElementById('fullName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    propertyAddress: `${config.property.streetAddress}, ${config.property.cityStateZip}`,
+                    agentEmail: config.realtor.email,
+                    submittedAt: new Date().toISOString(),
+                    questions: [],
+                    ...(config.deploymentInfo || {})
+                };
+
+                // 2. Webhook
+                if(config.settings.visitorWebhookUrl) {
+                    try {
+                        await fetch(config.settings.visitorWebhookUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(storedInitialPayload),
+                            mode: 'cors'
+                        });
+                    } catch(err) {}
+                }
+
+                setTimeout(() => {
+                    showModalStep(0);
+                }, 1000);
+            });
+        }
+
+        function showModalStep(index) {
+            const modal = document.getElementById('modalOverlay');
+            const content = document.getElementById('modalContent');
+            modal.classList.add('active');
+            content.innerHTML = '';
+
+            if(index < config.modalQuestions.length) {
+                const q = config.modalQuestions[index];
+                let html = `
+                    <span class="eyebrow">Concierge</span>
+                    <h2 style="font-size: 2rem; margin-bottom: 2rem;">${q.questionText}</h2>
+                    <div>
+                `;
+                q.options.forEach(opt => {
+                    html += `<div class="pill-option hover-target" onclick="handleAnswer('${q.id}', '${opt.value}', ${index})">${opt.text}</div>`;
+                });
+                html += `</div>`;
+                content.innerHTML = html;
+            } else {
+                finishSequence();
+            }
+        }
+
+        window.handleAnswer = (qid, val, idx) => {
+            collectedAnswers[qid] = val;
+            showModalStep(idx + 1);
+        };
+
+        function finishSequence() {
+            // Process Answers into Array
+            const questions = config.modalQuestions || [];
+            const modalQuestionResponses = [];
+            
+            for (const [qId, answerVal] of Object.entries(collectedAnswers)) {
+                const qObj = questions.find(q => q.id === qId);
+                if (qObj) {
+                    const optObj = qObj.options.find(o => o.value === answerVal);
+                    modalQuestionResponses.push({
+                        question: qObj.questionText,
+                        answer: optObj ? optObj.text : answerVal
+                    });
+                }
+            }
+
+            // Final Payload
+            const finalPayload = {
+                ...storedInitialPayload,
+                formType: "modal_answers",
+                submittedAt: new Date().toISOString(),
+                questions: modalQuestionResponses
+            };
+
+            // Webhook
+            if(config.settings.visitorWebhookUrl) {
+                fetch(config.settings.visitorWebhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(finalPayload),
+                    mode: 'cors'
+                });
+            }
+
+            // Success UI
+            const content = document.getElementById('modalContent');
+            content.innerHTML = `
+                <h2 style="font-size: 3rem; color: var(--gold); margin-bottom: 1rem;">Merci.</h2>
+                <p style="color: #666; margin-bottom: 2rem;">The <strong>Info Package</strong> has been sent to your inbox.</p>
+                <button onclick="location.reload()" class="btn-chic hover-target">Close</button>
+            `;
+            
+            fireConfetti();
+        }
+
+        function fireConfetti() {
+            const colors = config.settings.confettiColors || ['#c5a059', '#e8dcd8'];
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: colors });
+        }
+
+        // Custom Cursor Logic
+        const cursor = document.querySelector('.cursor-dot');
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 });
+        });
+        document.addEventListener('mouseover', (e) => {
+            if(e.target.classList.contains('hover-target') || e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') {
+                cursor.classList.add('hovered');
+            } else {
+                cursor.classList.remove('hovered');
+            }
+        });
+
+    </script>
+</body>
+</html>
