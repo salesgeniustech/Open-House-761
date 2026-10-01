@@ -1,28 +1,28 @@
 window.config = {
   "property": {
-    "streetAddress": "114 Smith Road ",
-    "city": "Kemptville",
-    "cityStateZip": "Kemptville, Ontario  K0G 1T0",
-    "heroSubtitle": "Prepare to be transformed by this stunning Detached that represents the pinnacle of residential design. With 4 carefully curated bedrooms, 4 luxurious bathrooms, and an expansive 2200 sq ft floor plan, this home is more than just a living space – it's a lifestyle statement. Every inch has been thoughtfully crafted to provide an exceptional living experience that balances aesthetic appeal with practical functionality, creating a harmonious environment that adapts to your most discerning needs.",
-    "backgroundImageUrl": "https://salesgenius.s3.ca-central-1.amazonaws.com/uploads/1763578619337-24-web-or-mls-20.jpg"
+    "streetAddress": "44 Andrew Hill Dr",
+    "city": "Vaughan",
+    "cityStateZip": "Vaughan, Ontario L4H 0H3",
+    "heroSubtitle": "Prepare to be transformed by this stunning Detached that represents the pinnacle of residential design. With 4 carefully curated bedrooms, 4 luxurious bathrooms, and an expansive 4209 sq ft floor plan, this home is more than just a living space – it's a lifestyle statement. Every inch has been thoughtfully crafted to provide an exceptional living experience that balances aesthetic appeal with practical functionality, creating a harmonious environment that adapts to your most discerning needs.",
+    "backgroundImageUrl": "https://salesgenius.s3.ca-central-1.amazonaws.com/uploads/1771964199145-11-web-or-mls-DSC00038.JPG"
   },
   "realtor": {
-    "fullName": "Nicole Garrett",
+    "fullName": "Oudi Elmalem",
     "title": "REALTOR®",
-    "email": "nicole@driscollpeca.com",
-    "phone": "613-258-2222",
-    "photoUrl": "https://salesgenius.s3.ca-central-1.amazonaws.com/uploads/upload-1487654.jpg",
-    "bio": "With years of real estate service under our belt, we can assure you that you are in good hands with our team. We are committed to listening to our clients, focusing on their needs and using keen negotiating skills to ensure a successful transaction for both buyers and sellers. With deep local knowledge and a true passion for real estate, we're committed to helping you find the perfect place to call home. Let's make your next move an exciting and rewarding one — we can't wait to work with you!",
+    "phone": "4163993023",
+    "email": "oudi@theskygroup.ca",
+    "photoUrl": "https://salesgenius.s3.ca-central-1.amazonaws.com/uploads/1761147883784-Headshot.jpeg",
+    "bio": "With over 15 years of combined experience, Shar, Oudi, and Stephen bring a personalized, strategic approach to Toronto real estate. As a close-knit team, they specialize in helping buyers, sellers, and investors navigate the market with clarity, confidence, and ease. Their process is built on trust, transparency, and tailored strategies that align with your unique goals—whether you're buying your first home, upgrading, or making a smart investment. With a deep understanding of market trends and a hands-on approach, Shar, Oudi, and Stephen are committed to delivering results while keeping the process smooth and stress-free",
     "social": {
-      "facebook": "https://www.facebook.com/driscollpecateam",
-      "instagram": "https://www.instagram.com/driscollpecateam",
-      "website": "https://www.driscollpeca.com"
+      "facebook": "https://www.facebook.com/theskygroupre",
+      "instagram": "https://www.instagram.com/theskygroup_re",
+      "website": "#"
     }
   },
   "brokerage": {
-    "name": "REAL Broker LTD",
-    "logoUrl": "https://yl-clients-prod.s3.amazonaws.com/1c2ff89a-b0f6-4582-ac27-3e2203d89e67117213106_brokeredby_logo_ontario.png",
-    "address": "218 Brant Avenue Brantford ON N3T 3H9"
+    "name": "Property.ca Inc",
+    "logoUrl": "https://salesgenius.s3.ca-central-1.amazonaws.com/uploads/upload-Property_logo_W.png",
+    "address": "36 Distillery Lane unit 500, Toronto, ON M5A 3C4"
   },
   "openHouse": {
     "eventDate": "",
@@ -30,89 +30,92 @@ window.config = {
             {
                   "icon": "fas fa-home",
                   "text": "Full Property Listing",
-                  "url": "https://www.realtor.ca/real-estate/29099863/114-smith-road-north-grenville-803-north-grenville-twp-kemptville-south"
+                  "url": "https://property.ca/vaughan/44-andrew-hill-drive-woodbridge"
             },
             {
                   "icon": "fas fa-vr-cardboard",
                   "text": "3D Virtual Tour",
-                  "url": "https://youtube.com/shorts/uwuZc_yULGI"
+                  "url": "https://tenzi-homes.aryeo.com/sites/44-andrew-hill-dr-vaughan-on-l4h-0h3-21751618/branded"
+            },
+            {
+                  "icon": "fas fa-ruler-combined",
+                  "text": "Architectural Floor Plan",
+                  "url": "https://drive.google.com/drive/folders/1rmZDC4ifo0RxtZ5oArEd8sPfRLmFNiXi?usp=sharing"
             },
             {
                   "icon": "fas fa-video",
                   "text": "Video Tour",
-                  "url": "https://youtube.com/shorts/uwuZc_yULGI"
-            },
-            {
-                  "icon": "fas fa-file-pdf",
-                  "text": "Feature Website ",
-                  "url": "https://sites.ground2airmedia.com/sites/xabmljb/unbranded"
+                  "url": "https://aryeo.sfo2.cdn.digitaloceanspaces.com/listings/019bfb4e-d430-7123-acb2-03068c340449/files/019c315d-7b80-70a2-8ee9-7c236da6a388.mp4"
             }
       ]
   },
   "meta": {
-    "pageTitlePrefix": "🏡 Nicole Garrett Open House",
+    "pageTitlePrefix": "🏡 Oudi Elmalem Open House",
     "navBrandLogoText": "OPEN HOUSE",
-    "privacyPolicyLink": "https://driscollpeca.com/privacy.html"
+    "privacyPolicyLink": "https://www.mls.theskygroup.ca/privacy-policy"
   },
   "settings": {
-    "primaryColor": "#00224a",
-    "secondaryColor": "#05C3F9",
-    "accentColor": "#05C3F9",
+   "primaryColor": "",
+    "secondaryColor": "",
+    "accentColor": "",
     "neutralColor": "",
     "adminWebhookUrl": "https://n8n.salesgenius.co/webhook/openhouseupdate",
     "visitorWebhookUrl": "https://n8n.salesgenius.co/webhook/openhouse",
     "confettiColors": [
-      "#A78BFA",
-      "#C4B5FD",
-      "#E9D5FF",
-      "#8B5CF6",
-      "#7C3AED"
+      "#6187a7",
+      "#f0e9d6",
+      "#ffffff",
+      "#83a363",
+      "#d9ac68"
     ]
   },
   "modalQuestions": [
-    {
-      "id": "agent_status",
-      "questionText": "Are you currently exploring homes with a real estate agent?",
-      "options": [
-        { "value": "committed", "text": "Yes, I'm committed to an agent." },
-        { "value": "not_committed", "text": "No, I'm not committed to an agent." },
-        { "value": "gathering_info", "text": "Just gathering information at this stage." }
-      ]
-    },
-    {
-      "id": "interest_level",
-      "questionText": "How interested are you in this Detached?",
-      "options": [
-        { "value": "very_interested", "text": "Very interested, actively looking." },
-        { "value": "somewhat_interested", "text": "Somewhat interested, keeping options open." },
-        { "value": "just_browsing", "text": "Just browsing for now." }
-      ]
-    },
-    {
-      "id": "neighborhood_engagement",
-      "questionText": "How do you usually enjoy the neighborhood?",
-      "options": [
-        { "value": "resident_explorer", "text": "I live here and love exploring locally." },
-        { "value": "considering_move", "text": "I'm considering moving to this area." },
-        { "value": "just_visiting", "text": "Just visiting for the open house." }
-      ]
-    },
-    {
-      "id": "feature_attraction",
-      "questionText": "What feature attracted you to this home?",
-      "options": [
-        { "value": "design_layout", "text": "The design and layout." },
-        { "value": "location_neighborhood", "text": "The location and neighborhood." },
-        { "value": "home_price", "text": "The price of the home." }
-      ]
-    }
-  ],
+  {
+    "id": "q_auto_1750445840887_0",
+    "questionText": "What's your current situation?",
+    "options": [
+      { "value": "I own my home", "text": "I own my home" },
+      { "value": "I rent", "text": "I rent" },
+      { "value": "Live with family/friends", "text": "Live with family/friends" },
+      { "value": "Between homes", "text": "Between homes" }
+    ]
+  },
+  {
+    "id": "q_auto_1750445840887_1",
+    "questionText": "What are you looking to do?",
+    "options": [
+      { "value": "Buy a home", "text": "Buy a home" },
+      { "value": "Sell and buy", "text": "Sell and buy" },
+      { "value": "Rent a place", "text": "Rent a place" },
+      { "value": "Invest in property", "text": "Invest in property" }
+    ]
+  },
+  {
+    "id": "q_auto_1750445840887_2",
+    "questionText": "When are you planning to move?",
+    "options": [
+      { "value": "ASAP", "text": "ASAP" },
+      { "value": "3-6 months", "text": "3-6 months" },
+      { "value": "6-12 months", "text": "6-12 months" },
+      { "value": "12+ months", "text": "12+ months" }
+    ]
+  },
+  {
+    "id": "agent_status",
+    "questionText": "Are you currently exploring homes with a real estate agent?",
+    "options": [
+      { "value": "committed", "text": "Yes, I'm committed to an agent." },
+      { "value": "not_committed", "text": "No, I'm not committed to an agent." },
+      { "value": "gathering_info", "text": "Just gathering information at this stage." }
+    ]
+  }
+],
   "deploymentInfo": {
-    "repoId": "1100037723",
-    "repoName": "Open-House-138",
-    "tag": "Open House 114 Smith Road ",
+    "repoId": "1400563314",
+    "repoName": "Open-House-761",
+    "crmLeadParsingEmail": "theskygroup@followupboss.me",
+    "tag": "Open House 44 Andrew Hill Dr",
     "netlifyUrl": "https://services.leadconnectorhq.com/hooks/KxSrsX5ZH2ZttFjyt9hW/webhook-trigger/723v7Nh8JC60wCn3aRmV",
-    "crmLeadParsingEmail": "",
-    "sgApiKey": ""
+    "sgApiKey": "api_651d5cdad825548a1a6682a190caf3fd"
   }
 };
